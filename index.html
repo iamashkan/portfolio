@@ -432,6 +432,15 @@ footer .f3d{opacity:.6;font-style:italic}
   </div>
   <div class="code-grid">
     <div class="ccard">
+      <div class="top"><div class="repo">iamashkan / solar-sentinel</div>
+        <div class="langbar"><i style="width:97%;background:#5aa2ff"></i><i style="width:1.5%;background:#9aa2b6"></i><i style="width:1.5%;background:#e0b25e"></i></div>
+        <div class="langs2"><span><span class="dot" style="background:#5aa2ff"></span>Python</span><span><span class="dot" style="background:#9aa2b6"></span>Dockerfile</span><span><span class="dot" style="background:#e0b25e"></span>Shell</span></div></div>
+      <div class="body"><h3>Solar Sentinel</h3>
+        <p>A digital twin of a desert solar farm that inspects every panel with computer vision, predicts energy loss with machine learning, and dispatches a cleaning robot to the highest-value panels under a realistic water budget. A soiling-regression CNN and a ResNet-18 fault classifier feed a gradient-boosted power-loss model; economic triage and 2-opt routing plan the cleaning run, exported to a ROS 2 Nav2 <code>FollowWaypoints</code> goal with a Gazebo physics twin — all served through a FastAPI inference service and a Streamlit dashboard.</p>
+        <div class="stack"><span>PyTorch</span><span>OpenCV</span><span>ResNet-18</span><span>Gradient Boosting</span><span>ROS 2 Nav2</span><span>Gazebo</span><span>FastAPI</span><span>Streamlit</span><span>Digital Twin</span></div>
+        <div class="links"><a class="src" href="https://github.com/iamashkan/solar-sentinel" target="_blank" rel="noopener">View source ↗</a></div></div>
+    </div>
+    <div class="ccard">
       <div class="top"><div class="repo">iamashkan / defect-inspection-digital-twin</div>
         <div class="langbar"><i style="width:92%;background:#5aa2ff"></i><i style="width:6%;background:#e0b25e"></i><i style="width:2%;background:#9aa2b6"></i></div>
         <div class="langs2"><span><span class="dot" style="background:#5aa2ff"></span>Python</span><span><span class="dot" style="background:#e0b25e"></span>Jupyter</span><span><span class="dot" style="background:#9aa2b6"></span>Dockerfile</span></div></div>
@@ -661,6 +670,57 @@ const bodyMat=new THREE.MeshStandardMaterial({color:0x16334f,emissive:0x2d6fe8,e
   metalness:.15,roughness:.45,transparent:true,opacity:.22,depthWrite:true});
 const wireMat=new THREE.MeshBasicMaterial({color:0x6fb6ff,wireframe:true,transparent:true,opacity:.45,
   blending:THREE.AdditiveBlending,depthWrite:false});
+
+/* ===== per-section "representation modes" for the digital twin =====
+   uLineY  : world-space scan line — real skin shows below it, hologram above (scroll-driven feet↔head).
+   uBlue   : 0→1 blueprint recolor of the hologram (Code / manufacturing section).
+   uDiss   : 0→1 disintegration — randomly discards fragments so the body breaks into a point/data cloud (XR).
+   uScan   : glow colour of the scan line and dissolve edges. */
+const holoU={uLineY:{value:9},uBand:{value:.16},uScan:{value:new THREE.Color(0x9fd4ff)},
+  uBlue:{value:0},uDiss:{value:0},uTime:{value:0}};
+function heightMask(mat,side){
+  const top=side==='top';
+  if(top){
+    mat.transparent=true;
+  }else{
+    /* real layer renders as a normal OPAQUE model so the body skin and the hair sort by depth
+       correctly (transparent + depthWrite:false on the hair was letting the scalp cover it → bald head).
+       alpha-test keeps any hair-card cutouts; the scan line clips the top off via a dithered discard. */
+    mat.transparent=false;mat.depthWrite=true;if(!(mat.alphaTest>0))mat.alphaTest=0.5;
+  }
+  const fade=mat.blending===THREE.AdditiveBlending?'gl_FragColor.rgb*=vis;':'gl_FragColor.a*=vis;';
+  mat.onBeforeCompile=sh=>{
+    sh.uniforms.uLineY=holoU.uLineY;sh.uniforms.uBand=holoU.uBand;sh.uniforms.uScan=holoU.uScan;
+    sh.uniforms.uBlue=holoU.uBlue;sh.uniforms.uDiss=holoU.uDiss;sh.uniforms.uTime=holoU.uTime;
+    sh.vertexShader='varying vec3 vWp;\n'+sh.vertexShader.replace(
+      '#include <skinning_vertex>','#include <skinning_vertex>\n\tvWp=(modelMatrix*vec4(transformed,1.0)).xyz;');
+    let body='float vHy=vWp.y;\n'+
+      'float _a=smoothstep(uLineY-uBand,uLineY+uBand,vHy);\n';
+    if(top){
+      body+='float vis=_a;\n'+
+        /* disintegrate into a drifting point/data cloud */
+        'float h=fract(sin(dot(floor(vWp*46.0+uTime*0.5),vec3(12.9898,78.233,37.719)))*43758.5453);\n'+
+        'if(uDiss>0.001 && h<uDiss) discard;\n'+
+        'if(vis<0.02)discard;\n'+fade+'\n'+
+        /* blueprint: push toward technical cyan-on-navy */
+        'gl_FragColor.rgb=mix(gl_FragColor.rgb, gl_FragColor.rgb*vec3(0.30,0.72,1.6)+vec3(0.0,0.05,0.14), uBlue);\n'+
+        /* glow on fragments near the dissolve edge so it shimmers as it scatters */
+        'gl_FragColor.rgb+=uScan*smoothstep(uDiss+0.06,uDiss,h)*step(0.002,uDiss)*0.9;\n';
+    }else{
+      /* opaque dither clip: keep the real skin below the line, soft edge without breaking depth sort */
+      body+='float vis=1.0-_a;\n'+
+        'float hb=fract(sin(dot(floor(vWp*130.0),vec3(12.9898,78.233,37.719)))*43758.5453);\n'+
+        'if(vis<hb) discard;\n';
+    }
+    body+='gl_FragColor.rgb+=uScan*exp(-pow((vHy-uLineY)/(uBand*0.55),2.0))*0.7;\n';
+    sh.fragmentShader='varying vec3 vWp;\nuniform float uLineY;uniform float uBand;uniform vec3 uScan;'+
+      'uniform float uBlue;uniform float uDiss;uniform float uTime;\n'+
+      sh.fragmentShader.replace('#include <dithering_fragment>',body+'#include <dithering_fragment>');
+  };
+  mat.customProgramCacheKey=()=>'holo_'+side+(mat.blending===THREE.AdditiveBlending?'_add':'');
+  return mat;
+}
+heightMask(bodyMat,'top');heightMask(wireMat,'top');
 /* wireframe dims on a steeper curve: additive lines stack per-pixel and resist linear dimming */
 const fadeAvatar=[{m:bodyMat,o:bodyMat.opacity,e:1},{m:wireMat,o:wireMat.opacity,e:1.7}];
 const fadeScene=[];
@@ -697,31 +757,64 @@ const pmat=new THREE.PointsMaterial({color:0x7fc0ff,size:.02,transparent:true,op
 const pts=new THREE.Points(pgeo,pmat);G.add(pts);
 
 /* avatar — humanoid GLB with idle/walk/run, wireframe shell sharing the same skeleton */
-let model=null,mixer=null;const act={};
+let model=null,mixer=null,mYMin=0,mYH=1;const act={},clipRole={};
+/* clips arrive across several same-rig GLBs (model1=smoke, model5=idle).
+   sort each into a role, then (re)build its mixer action as soon as the body exists. */
+function registerClips(anims){
+  (anims||[]).forEach(c=>{const n=c.name.toLowerCase();
+    const role=n.includes('idle')?'idle':n.includes('smok')?'smoke':
+      (n.includes('walk')||n.includes('mixamo'))?'walk':n.includes('run')?'run':null;
+    if(role&&!clipRole[role])clipRole[role]=c;});
+  buildActions();
+}
+function buildActions(){
+  if(!mixer)return;
+  for(const role in clipRole){
+    if(!act[role]){act[role]=mixer.clipAction(clipRole[role]);
+      act[role].reset().setLoop(THREE.LoopRepeat).setEffectiveWeight(0).play();}
+  }
+  /* guarantee something is visibly moving until the section logic takes over */
+  const base=act.idle||act.smoke||act.walk||act.run;
+  if(base&&!Object.values(act).some(a=>a.getEffectiveWeight()>0.001))base.setEffectiveWeight(1);
+}
 function adopt(gltf){
   const m=gltf.scene;
-  const skins=[];m.traverse(o=>{if(o.isSkinnedMesh)skins.push(o);else if(o.isMesh)o.material=bodyMat;});
-  skins.forEach(src=>{
-    src.material=bodyMat;src.frustumCulled=false;
-    const w=new THREE.SkinnedMesh(src.geometry,wireMat);
-    w.position.copy(src.position);w.quaternion.copy(src.quaternion);w.scale.copy(src.scale);
-    w.bind(src.skeleton,src.bindMatrix);w.frustumCulled=false;
-    src.parent.add(w);
+  const done=new Set(),shells=[];
+  m.traverse(o=>{
+    if(!o.isMesh&&!o.isSkinnedMesh)return;
+    o.frustumCulled=false;shells.push(o);
+    /* real layer: keep model1's own textured materials, masked to the lower body.
+       NOT added to fadeAvatar — it's opaque + alpha-tested now, so dimming its opacity
+       below the alphaTest would discard the whole body. */
+    (Array.isArray(o.material)?o.material:[o.material]).forEach(mat=>{
+      if(done.has(mat))return;done.add(mat);
+      heightMask(mat,'bottom');
+    });
+  });
+  /* hologram layers: blue body fill + glowing wireframe, masked to the upper body, sharing the skeleton */
+  shells.forEach(src=>{
+    [bodyMat,wireMat].forEach(mat=>{
+      const w=src.isSkinnedMesh?new THREE.SkinnedMesh(src.geometry,mat):new THREE.Mesh(src.geometry,mat);
+      w.position.copy(src.position);w.quaternion.copy(src.quaternion);w.scale.copy(src.scale);
+      if(src.isSkinnedMesh)w.bind(src.skeleton,src.bindMatrix);
+      w.frustumCulled=false;src.parent.add(w);
+    });
   });
   mixer=new THREE.AnimationMixer(m);
-  gltf.animations.forEach(c=>{const n=c.name.toLowerCase();
-    if(n.includes('idle'))act.idle=mixer.clipAction(c);
-    else if(n.includes('walk'))act.walk=mixer.clipAction(c);
-    else if(n.includes('run'))act.run=mixer.clipAction(c);});
-  Object.values(act).forEach(a=>{a.setEffectiveWeight(0);a.play();});
-  if(act.idle)act.idle.setEffectiveWeight(1);
+  registerClips(gltf.animations);
   if(RM&&mixer)mixer.update(.03);
+  /* measure local height so the scan line can travel feet→head regardless of scroll scale */
+  const bb=new THREE.Box3().setFromObject(m);mYMin=bb.min.y;mYH=Math.max(.001,bb.max.y-bb.min.y);
   G.add(m);model=m;
 }
-function mannequin(){ /* offline fallback: capsule humanoid, no skeleton */
+function mannequin(){ /* offline fallback: capsule humanoid, no skeleton, no height mask */
+  const bodyP=bodyMat.clone(),wireP=wireMat.clone();
+  bodyP.onBeforeCompile=()=>{};wireP.onBeforeCompile=()=>{};
+  bodyP.customProgramCacheKey=()=>'plain_body';wireP.customProgramCacheKey=()=>'plain_wire';
+  fadeAvatar.push({m:bodyP,o:bodyP.opacity,e:1},{m:wireP,o:wireP.opacity,e:1.7});
   const g=new THREE.Group();
-  const add=(geo,x,y,z,rz=0)=>{const m=new THREE.Mesh(geo,bodyMat);m.position.set(x,y,z);m.rotation.z=rz;
-    const w=new THREE.Mesh(geo,wireMat);w.position.copy(m.position);w.rotation.copy(m.rotation);g.add(m,w);};
+  const add=(geo,x,y,z,rz=0)=>{const m=new THREE.Mesh(geo,bodyP);m.position.set(x,y,z);m.rotation.z=rz;
+    const w=new THREE.Mesh(geo,wireP);w.position.copy(m.position);w.rotation.copy(m.rotation);g.add(m,w);};
   add(new THREE.SphereGeometry(.115,18,14),0,1.62,0);
   add(new THREE.CylinderGeometry(.045,.05,.09,10),0,1.49,0);
   add(new THREE.CapsuleGeometry(.155,.34,6,14),0,1.18,0);
@@ -736,16 +829,31 @@ function mannequin(){ /* offline fallback: capsule humanoid, no skeleton */
   });
   G.add(g);model=g;
 }
-const SRC=['assets/avatar.glb','https://cdn.jsdelivr.net/gh/mrdoob/three.js@r160/examples/models/gltf/Xbot.glb'];
+const SRC=['assets/model1.glb','assets/avatar.glb','https://cdn.jsdelivr.net/gh/mrdoob/three.js@r160/examples/models/gltf/Xbot.glb'];
+/* same-rig clip banks merged onto the loaded body so the twin can change motion per section */
+const CLIPS=['assets/model5.glb'];
 (function load(i){
   if(i>=SRC.length){mannequin();return;}
-  new GLTFLoader().load(SRC[i],g=>{try{adopt(g)}catch(e){console.warn(e);mannequin()}},undefined,()=>load(i+1));
+  new GLTFLoader().load(SRC[i],g=>{
+    try{adopt(g);
+      if(i===0)CLIPS.forEach(u=>new GLTFLoader().load(u,e=>registerClips(e.animations),undefined,()=>{}));
+    }catch(e){console.warn(e);mannequin()}
+  },undefined,()=>load(i+1));
 })(0);
 
-/* scroll choreography — waypoints per section, x as fraction of visible half-width */
-const WP={header:{fx:.5,s:1.12,dim:1},about:{fx:-.88,s:.94,dim:.5},research:{fx:.88,s:.9,dim:.45},
-  work:{fx:-.9,s:.88,dim:.4},code:{fx:.9,s:.88,dim:.4},experience:{fx:-.88,s:.92,dim:.5},
-  certifications:{fx:.9,s:.9,dim:.4},contact:{fx:-.42,s:1.08,dim:.85}};
+/* scroll choreography — waypoints per section.
+   fx: x as fraction of visible half-width · s: scale · dim: brightness
+   real: fraction of body kept as real skin (1=all real → 0=all hologram)
+   blue: blueprint recolor · diss: disintegration/point-cloud · anim: motion role */
+const WP={
+  header:       {fx:.5, s:1.12,dim:1,  real:1,   blue:0,  diss:0,  anim:'idle'},  // real you
+  about:        {fx:-.88,s:.94,dim:.5,  real:.5,  blue:0,  diss:.12,anim:'smoke'}, // digitizing
+  research:     {fx:.88, s:.9, dim:.45, real:.08, blue:0,  diss:0,  anim:'idle'},  // wireframe twin
+  work:         {fx:-.9, s:.88,dim:.4,  real:0,   blue:0,  diss:.72,anim:'idle'},  // XR → point cloud
+  code:         {fx:.9,  s:.88,dim:.4,  real:0,   blue:1,  diss:0,  anim:'idle'},  // CAD blueprint
+  experience:   {fx:-.88,s:.92,dim:.5,  real:0,   blue:.35,diss:0,  anim:'smoke'},
+  certifications:{fx:.9, s:.9, dim:.4,  real:0,   blue:0,  diss:.18,anim:'idle'},
+  contact:      {fx:-.42,s:1.08,dim:.85,real:0,   blue:0,  diss:.45,anim:'smoke'}}; // full hologram
 const track=[];
 function buildTrack(){
   track.length=0;
@@ -756,14 +864,17 @@ function buildTrack(){
   track.sort((p,q)=>p.y-q.y);
 }
 function sample(sy){
-  if(!track.length)return{x:0,s:1,dim:1};
+  if(!track.length)return{x:0,s:1,dim:1,real:1,blue:0,diss:0,animA:'idle',animB:'idle',au:0};
   let a=track[0],b=track[0];
   for(let i=0;i<track.length;i++){if(track[i].y<=sy){a=track[i];b=track[i+1]||track[i];}}
   const span=b.y-a.y;let u=span>0?THREE.MathUtils.clamp((sy-a.y)/span,0,1):0;
   u=u*u*(3-2*u);
-  const fx=THREE.MathUtils.lerp(a.fx,b.fx,u),s=THREE.MathUtils.lerp(a.s,b.s,u),d=THREE.MathUtils.lerp(a.dim,b.dim,u);
+  const L=THREE.MathUtils.lerp;
+  const fx=L(a.fx,b.fx,u),s=L(a.s,b.s,u),d=L(a.dim,b.dim,u);
+  const mode={real:L(a.real,b.real,u),blue:L(a.blue,b.blue,u),diss:L(a.diss,b.diss,u),
+    animA:a.anim,animB:b.anim,au:u};
   const halfW=Math.tan(cam.fov*Math.PI/360)*cam.position.z*cam.aspect;
-  return innerWidth<861?{x:0,s:s*.85,dim:d*.35}:{x:fx*halfW,s,dim:d};
+  return innerWidth<861?{x:0,s:s*.85,dim:d*.35,...mode}:{x:fx*halfW,s,dim:d,...mode};
 }
 function onResize(){
   renderer.setSize(innerWidth,innerHeight,false);
@@ -782,6 +893,7 @@ document.body.classList.add('has3d');
 
 const clock=new THREE.Clock();
 let px=sample(scrollY).x,pscale=1,pdim=1,lastSy=scrollY,scrollV=0,appS=0,appA=0;
+let mReal=1,mBlue=0,mDiss=0;   /* smoothed per-section representation weights */
 G.position.x=px;
 window.__holo={THREE,G,cam,scene,renderer,model:()=>model};
 function frame(){
@@ -792,19 +904,29 @@ function frame(){
   const oldx=px;px+=(tgt.x-px)*k;G.position.x=px;
   pscale+=(tgt.s-pscale)*k;G.scale.setScalar(pscale);
   pdim+=(tgt.dim-pdim)*k;
+  /* per-section representation: scan line follows scroll (real→wireframe), blueprint + dissolve layer on top */
+  mReal+=(tgt.real-mReal)*k;mBlue+=(tgt.blue-mBlue)*k;mDiss+=(tgt.diss-mDiss)*k;
+  holoU.uTime.value=t;
+  /* pad the travel beyond head/feet by >half a band so real:1 has no wireframe scalp
+     and real:0 leaves no real sliver at the feet */
+  const bandL=.13,marginL=.2;
+  holoU.uBand.value=pscale*bandL;
+  holoU.uLineY.value=G.position.y+pscale*((mYMin-marginL)+mReal*(mYH+2*marginL));
+  holoU.uBlue.value=mBlue;holoU.uDiss.value=mDiss;
   appS+=(1-appS)*Math.min(1,dt*1.6);
   appA+=((model?1:0)-appA)*Math.min(1,dt*1.8);
   fadeScene.forEach(f=>f.m.opacity=f.o*pdim*appS);
   const fA=pdim*appA;
   fadeAvatar.forEach(f=>f.m.opacity=f.o*Math.pow(fA,f.e));
   const vx=(px-oldx)/Math.max(dt,.001);
-  const speed=Math.abs(vx)*1.5+Math.min(1.4,Math.abs(scrollV)/1500);
   if(mixer){
-    let w=THREE.MathUtils.clamp((speed-.12)/.55,0,1),r=THREE.MathUtils.clamp((speed-1.1)/.9,0,1);
-    if(RM){w=0;r=0}
-    const wk=Math.min(1,dt*5);
-    const setW=(a,v)=>{if(a)a.setEffectiveWeight(a.getEffectiveWeight()+(v-a.getEffectiveWeight())*wk)};
-    setW(act.run,r);setW(act.walk,w*(1-r));setW(act.idle,1-Math.max(w,r));
+    /* cross-fade between the two surrounding sections' motions (idle / smoke / walk) */
+    const tw={};for(const r in act)tw[r]=0;
+    if(tgt.animA)tw[tgt.animA]=(tw[tgt.animA]||0)+(1-tgt.au);
+    if(tgt.animB)tw[tgt.animB]=(tw[tgt.animB]||0)+tgt.au;
+    if(!Object.keys(act).some(r=>tw[r]>0.001)){const f=act.idle?'idle':Object.keys(act)[0];if(f)tw[f]=1;}
+    const wk=Math.min(1,dt*4);
+    for(const r in act)act[r].setEffectiveWeight(act[r].getEffectiveWeight()+((tw[r]||0)-act[r].getEffectiveWeight())*wk);
     if(!RM)mixer.update(dt);
   }else if(model){model.position.y=Math.sin(t*1.6)*.02;}
   if(model){
