@@ -23,7 +23,7 @@
   --mono:'Space Grotesk',monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;overflow-x:hidden}
 body{font-family:var(--sans);background:var(--bg);color:var(--ink);overflow-x:hidden;
   line-height:1.7;-webkit-font-smoothing:antialiased}
 ::selection{background:rgba(90,162,255,.28)}
@@ -676,15 +676,9 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 
 const canvas=document.getElementById('scene3d');
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
-/* The WebGL twin streams ~9MB of GLB models and runs a continuous render loop —
-   far too heavy for phones. Below the desktop breakpoint (or under Save-Data) we
-   skip it entirely and keep the lightweight portrait + orbiting-ring fallback. */
-const ENABLE_3D=matchMedia('(min-width:901px)').matches && !(navigator.connection&&navigator.connection.saveData);
 let renderer=null;
-if(ENABLE_3D){
-  try{renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});}
-  catch(e){console.warn('3D hologram disabled:',e);}
-}
+try{renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});}
+catch(e){console.warn('3D hologram disabled:',e);}
 if(renderer){
 
 const scene=new THREE.Scene();
