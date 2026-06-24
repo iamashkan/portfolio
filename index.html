@@ -650,7 +650,10 @@ footer .f3d{opacity:.6;font-style:italic}
 const nav=document.getElementById('nav'),prog=document.getElementById('progress');
 addEventListener('scroll',()=>{nav.classList.toggle('scrolled',scrollY>30);
   const m=document.body.scrollHeight-innerHeight;prog.style.width=(scrollY/m*100)+'%';});
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
+/* reveal on enter — height-independent trigger: a % threshold can never fire for a section
+   taller than viewport/threshold (a tall #code maxes out ~0.15 ratio), leaving it stuck hidden.
+   threshold:0 + a bottom rootMargin reveals each section once its top scrolls a fixed slice in. */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:0,rootMargin:'0px 0px -12% 0px'});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
 /* scroll-driven 3D gyroscope */
