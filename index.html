@@ -6,18 +6,18 @@
 <title>Ashkan Aghamoali — AI Researcher & XR Developer</title>
 <meta name="description" content="Ashkan Aghamoali — AI Researcher and XR Developer in the Mechanical Intelligence Research Group at London South Bank University. Machine learning, bio-inspired design and immersive AR/VR.">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-<link rel="mask-icon" href="assets/favicon.svg" color="#5aa2ff">
-<meta name="theme-color" content="#0a0e17">
+<link rel="mask-icon" href="assets/favicon.svg" color="#ffffff">
+<meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0a0e17; --bg2:#0e1424;
-  --ink:#eaeef6; --mut:#98a2b6; --soft:#c4cbdb;
-  --line:rgba(255,255,255,.09);
-  --panel:rgba(255,255,255,.035);
-  --accent:#5aa2ff; --accent2:#46d6c4;
+  --bg:#000; --bg2:#0a0a0a;
+  --ink:#fafafa; --mut:#a1a1aa; --soft:#d4d4d8;
+  --line:rgba(255,255,255,.1);
+  --panel:rgba(255,255,255,.025);
+  --accent:#fafafa; --accent2:#d4d4d8;
   --serif:'Newsreader',Georgia,serif;
   --sans:'Inter',system-ui,sans-serif;
   --mono:'Space Grotesk',monospace;
@@ -26,42 +26,44 @@
 html{scroll-behavior:smooth;overflow-x:hidden}
 body{font-family:var(--sans);background:var(--bg);color:var(--ink);overflow-x:hidden;
   line-height:1.7;-webkit-font-smoothing:antialiased}
-::selection{background:rgba(90,162,255,.28)}
+::selection{background:rgba(255,255,255,.25)}
 a{color:inherit;text-decoration:none}
 .wrap{max-width:1120px;margin:0 auto;padding:0 28px}
 .serif{font-family:var(--serif)}
 
-/* subtle perspective grid background */
+/* soft monochrome spotlight + light rays (Resend-style) */
 .bg-grid{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-.bg-grid::before{content:"";position:absolute;left:-25%;right:-25%;bottom:-30%;height:90%;
-  background-image:linear-gradient(rgba(90,162,255,.10) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(90,162,255,.10) 1px,transparent 1px);
-  background-size:46px 46px;transform:perspective(520px) rotateX(62deg);
-  -webkit-mask:linear-gradient(transparent,#000 70%);mask:linear-gradient(transparent,#000 70%);
-  animation:grid 24s linear infinite}
-@keyframes grid{to{background-position:0 46px,46px 0}}
-.bg-orb{position:fixed;border-radius:50%;filter:blur(110px);z-index:0;opacity:.22;pointer-events:none}
-.bg-orb.a{width:420px;height:420px;background:var(--accent);top:-120px;right:-80px}
-.bg-orb.b{width:380px;height:380px;background:var(--accent2);bottom:-140px;left:-100px}
+.bg-grid::before{content:"";position:absolute;left:50%;top:-42%;width:150%;height:95%;transform:translateX(-50%);
+  background:radial-gradient(ellipse 50% 52% at 50% 50%,rgba(255,255,255,.07),transparent 70%)}
+.bg-grid::after{content:"";position:absolute;left:-12%;right:-12%;bottom:-6%;height:60%;
+  background:
+    conic-gradient(from 195deg at 22% 100%,transparent 0deg,rgba(255,255,255,.05) 7deg,transparent 16deg),
+    conic-gradient(from 175deg at 55% 100%,transparent 0deg,rgba(255,255,255,.04) 9deg,transparent 20deg),
+    conic-gradient(from 150deg at 85% 100%,transparent 0deg,rgba(255,255,255,.045) 8deg,transparent 18deg);
+  filter:blur(26px)}
+.bg-orb{position:fixed;border-radius:50%;filter:blur(120px);z-index:0;opacity:.05;pointer-events:none;background:#fff}
+.bg-orb.a{width:420px;height:420px;top:-120px;right:-80px}
+.bg-orb.b{width:380px;height:380px;bottom:-140px;left:-100px}
 
 /* progress + nav */
 #progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:99;background:var(--accent)}
 nav{position:fixed;top:0;left:0;right:0;z-index:50;transition:.35s}
 nav .wrap{display:flex;align-items:center;justify-content:space-between;height:72px}
-nav.scrolled{background:rgba(10,14,23,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+nav.scrolled{background:rgba(0,0,0,.8);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
 .brand{font-family:var(--serif);font-weight:600;font-size:1.12rem}
 .navlinks{display:flex;gap:30px}
 .navlinks a{font-size:.88rem;color:var(--mut);transition:.2s;font-weight:500}
 .navlinks a:hover{color:var(--ink)}
-.nav-cta{font-size:.84rem;border:1px solid var(--line);padding:9px 17px;border-radius:8px;background:var(--panel);transition:.25s}
-.nav-cta:hover{border-color:var(--accent);color:var(--accent)}
+.nav-cta{font-size:.84rem;font-weight:600;border:1px solid var(--line);padding:9px 19px;border-radius:9999px;background:#141414;transition:.25s}
+.nav-cta:hover{background:#1f1f1f;border-color:rgba(255,255,255,.25)}
 
 /* hero */
 header{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;padding:120px 0 80px}
 .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;width:100%}
-.eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--accent2);margin-bottom:22px;display:flex;align-items:center;gap:12px}
-.eyebrow .ln{width:30px;height:1px;background:var(--accent2)}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--mut);margin-bottom:24px;display:inline-flex;align-items:center;gap:10px;
+  border:1px solid var(--line);border-radius:9999px;padding:8px 18px;background:rgba(255,255,255,.03)}
+.eyebrow .ln{width:6px;height:6px;border-radius:50%;background:var(--ink)}
 header h1{font-family:var(--serif);font-weight:500;font-size:clamp(2.8rem,6.5vw,4.6rem);line-height:1.04;letter-spacing:-.5px}
 .affil{font-size:1.02rem;color:var(--soft);margin-top:20px;font-weight:400}
 .affil b{color:var(--ink);font-weight:600}
@@ -69,11 +71,11 @@ header h1{font-family:var(--serif);font-weight:500;font-size:clamp(2.8rem,6.5vw,
 .interests{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
 .interests span{font-size:.8rem;color:var(--soft);border:1px solid var(--line);padding:6px 13px;border-radius:100px;background:var(--panel)}
 .cta-row{display:flex;gap:12px;margin-top:34px;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:9px;font-weight:600;font-size:.9rem;transition:.25s}
-.btn-primary{background:var(--accent);color:#06101f}
-.btn-primary:hover{background:#74b2ff;transform:translateY(-2px)}
-.btn-ghost{border:1px solid var(--line);background:var(--panel)}
-.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:9999px;font-weight:600;font-size:.9rem;transition:.25s}
+.btn-primary{background:#fff;color:#000}
+.btn-primary:hover{background:#e4e4e7;transform:translateY(-2px)}
+.btn-ghost{border:1px solid var(--line);background:#141414}
+.btn-ghost:hover{background:#1f1f1f;border-color:rgba(255,255,255,.25)}
 
 /* CSS portrait fallback — used when WebGL is unavailable */
 .orbit-stage{position:relative;display:flex;justify-content:center;align-items:center;min-height:440px}
@@ -81,21 +83,21 @@ header h1{font-family:var(--serif);font-weight:500;font-size:clamp(2.8rem,6.5vw,
 .portrait img{width:100%;height:100%;border-radius:50%;display:block;
   border:3px solid var(--bg);box-shadow:0 0 0 1px var(--line),0 18px 50px rgba(0,0,0,.55)}
 .portrait::before{content:"";position:absolute;inset:-10px;border-radius:50%;
-  background:conic-gradient(from 0deg,var(--accent),var(--accent2),var(--accent));
+  background:conic-gradient(from 0deg,rgba(255,255,255,.75),rgba(255,255,255,.08),rgba(255,255,255,.75));
   -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 2px));
   mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 2px));opacity:.85}
 
 .scroll-hint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);z-index:2;
   font-family:var(--mono);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);
   display:flex;flex-direction:column;align-items:center;gap:8px}
-.scroll-hint .bar{width:1px;height:30px;background:linear-gradient(var(--accent),transparent);animation:drop 1.8s ease-in-out infinite}
+.scroll-hint .bar{width:1px;height:30px;background:linear-gradient(rgba(255,255,255,.8),transparent);animation:drop 1.8s ease-in-out infinite}
 @keyframes drop{0%{opacity:0;transform:scaleY(.3)}50%{opacity:1}100%{opacity:0;transform:translateY(12px) scaleY(.3)}}
 
 /* sections */
 section{position:relative;z-index:2;padding:96px 0}
 .sec-head{max-width:760px;margin-bottom:6px}
-.sec-eyebrow{font-family:var(--mono);font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent2);margin-bottom:14px}
-.sec-eyebrow b{color:var(--accent)}
+.sec-eyebrow{font-family:var(--mono);font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);margin-bottom:14px}
+.sec-eyebrow b{color:var(--ink)}
 .sec-title{font-family:var(--serif);font-weight:500;font-size:clamp(1.9rem,4vw,2.7rem);letter-spacing:-.3px;line-height:1.1;margin-bottom:14px}
 .sec-intro{color:var(--mut);font-size:1.04rem;font-weight:300}
 .reveal{opacity:0;transform:perspective(900px) rotateX(7deg) translateY(34px);transform-origin:center top;transition:.85s cubic-bezier(.2,.7,.2,1)}
@@ -113,19 +115,19 @@ section{position:relative;z-index:2;padding:96px 0}
 /* skills */
 .skills{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,235px),1fr));gap:16px;margin-top:46px}
 .scard{border:1px solid var(--line);border-radius:14px;padding:24px;background:var(--panel);transition:.28s}
-.scard:hover{transform:translateY(-5px);border-color:rgba(90,162,255,.32)}
-.scard h3{font-size:.98rem;margin-bottom:12px;font-weight:600;color:var(--accent2)}
+.scard:hover{transform:translateY(-5px);border-color:rgba(255,255,255,.24);background:rgba(255,255,255,.045)}
+.scard h3{font-size:.98rem;margin-bottom:12px;font-weight:600;color:var(--ink)}
 .scard .tags{display:flex;flex-wrap:wrap;gap:7px}
 .scard .tags span{font-size:.77rem;color:var(--mut);padding:5px 11px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
 
 /* work */
 .proj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:22px;margin-top:46px}
 .proj{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel);transition:.3s}
-.proj:hover{transform:translateY(-6px);border-color:rgba(90,162,255,.35)}
+.proj:hover{transform:translateY(-6px);border-color:rgba(255,255,255,.25)}
 .proj .vid{position:relative}
-.proj video{width:100%;display:block;aspect-ratio:640/296;object-fit:cover;background:#05070e}
+.proj video{width:100%;display:block;aspect-ratio:640/296;object-fit:cover;background:#050505}
 .proj .tagpill{position:absolute;top:12px;left:12px;font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;
-  background:rgba(10,14,23,.8);backdrop-filter:blur(6px);color:var(--accent2);padding:4px 10px;border-radius:6px;border:1px solid var(--line)}
+  background:rgba(0,0,0,.75);backdrop-filter:blur(6px);color:var(--soft);padding:4px 12px;border-radius:9999px;border:1px solid var(--line)}
 .proj .body{padding:20px 22px 24px}
 .proj h3{font-family:var(--serif);font-size:1.22rem;font-weight:500;margin-bottom:8px}
 .proj p{color:var(--mut);font-size:.92rem;font-weight:300}
@@ -135,7 +137,7 @@ section{position:relative;z-index:2;padding:96px 0}
 /* 3D screen showcase (from AR screen recording) */
 .showcase3d{perspective:1500px;display:flex;justify-content:center;margin:6px 0 16px;position:relative}
 .showcase3d::before{content:"";position:absolute;width:62%;height:75%;top:12%;left:19%;
-  background:radial-gradient(circle,rgba(90,162,255,.4),rgba(70,214,196,.12),transparent 70%);filter:blur(75px);z-index:0}
+  background:radial-gradient(circle,rgba(255,255,255,.18),rgba(255,255,255,.05),transparent 70%);filter:blur(75px);z-index:0}
 .screen3d{position:relative;z-index:1;width:min(780px,94%);transform-style:preserve-3d;border-radius:16px;overflow:hidden;
   border:1px solid rgba(255,255,255,.14);box-shadow:0 44px 100px rgba(0,0,0,.62);
   animation:float3d 12s ease-in-out infinite;will-change:transform}
@@ -148,9 +150,9 @@ section{position:relative;z-index:2;padding:96px 0}
 /* code */
 .code-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:22px;margin-top:46px}
 .ccard{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel);transition:.3s}
-.ccard:hover{transform:translateY(-6px);border-color:rgba(70,214,196,.35)}
+.ccard:hover{transform:translateY(-6px);border-color:rgba(255,255,255,.25)}
 .ccard .top{padding:22px 22px 18px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--line)}
-.ccard .repo{font-family:var(--mono);font-size:.8rem;color:var(--accent2);word-break:break-all}
+.ccard .repo{font-family:var(--mono);font-size:.8rem;color:var(--soft);word-break:break-all}
 .ccard .langbar{display:flex;height:5px;border-radius:5px;overflow:hidden;margin-top:14px;background:rgba(255,255,255,.06)}
 .ccard .langbar i{height:100%}
 .ccard .langs2{display:flex;flex-wrap:wrap;gap:12px;margin-top:9px}
@@ -162,11 +164,11 @@ section{position:relative;z-index:2;padding:96px 0}
 .ccard .stack{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 16px}
 .ccard .stack span{font-size:.71rem;color:var(--mut);padding:4px 9px;border-radius:6px;border:1px solid var(--line)}
 .ccard .links{display:flex;gap:9px}
-.ccard .links a{flex:1;text-align:center;font-size:.83rem;font-weight:600;padding:10px;border-radius:8px;transition:.22s}
-.ccard .links .src{border:1px solid var(--line);background:rgba(255,255,255,.03)}
-.ccard .links .src:hover{border-color:var(--accent);color:var(--accent)}
-.ccard .links .live{background:var(--accent);color:#06101f}
-.ccard .links .live:hover{background:#74b2ff}
+.ccard .links a{flex:1;text-align:center;font-size:.83rem;font-weight:600;padding:10px;border-radius:9999px;transition:.22s}
+.ccard .links .src{border:1px solid var(--line);background:#141414}
+.ccard .links .src:hover{background:#1f1f1f;border-color:rgba(255,255,255,.25)}
+.ccard .links .live{background:#fff;color:#000}
+.ccard .links .live:hover{background:#e4e4e7}
 .gh-all{display:inline-flex;align-items:center;gap:9px;margin-top:30px;font-family:var(--mono);font-size:.88rem;
   border:1px solid var(--line);padding:12px 20px;border-radius:8px;background:var(--panel);transition:.25s}
 .gh-all:hover{border-color:var(--accent);color:var(--accent)}
@@ -175,25 +177,25 @@ section{position:relative;z-index:2;padding:96px 0}
 .pub-list{margin-top:46px;display:flex;flex-direction:column;gap:14px}
 .pub{display:grid;grid-template-columns:74px 1fr auto;gap:22px;align-items:center;
   border:1px solid var(--line);border-radius:14px;padding:24px 26px;background:var(--panel);transition:.28s}
-.pub:hover{border-color:rgba(90,162,255,.35);background:rgba(255,255,255,.04)}
-.pub .yr{font-family:var(--serif);font-size:1.5rem;color:var(--accent2)}
+.pub:hover{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.04)}
+.pub .yr{font-family:var(--serif);font-size:1.5rem;color:var(--soft)}
 .pub h3{font-size:1.06rem;line-height:1.45;margin-bottom:6px;font-weight:600}
 .pub .auth{color:var(--soft);font-size:.88rem;font-weight:300}
 .pub .meta{color:var(--mut);font-size:.86rem;font-style:italic;margin-top:3px}
 .pub .badge{display:inline-block;font-family:var(--mono);font-size:.64rem;font-style:normal;text-transform:uppercase;letter-spacing:.08em;
   padding:2px 8px;border-radius:5px;margin-left:8px}
-.badge.pubd{color:var(--accent2);border:1px solid rgba(70,214,196,.4)}
-.badge.ms{color:#e0b25e;border:1px solid rgba(224,178,94,.4)}
-.pub .go{font-family:var(--mono);font-size:.82rem;color:var(--accent);white-space:nowrap}
-.pub .go:hover{color:var(--accent2)}
+.badge.pubd{color:var(--ink);border:1px solid rgba(255,255,255,.35)}
+.badge.ms{color:var(--mut);border:1px solid rgba(255,255,255,.2)}
+.pub .go{font-family:var(--mono);font-size:.82rem;color:var(--ink);white-space:nowrap}
+.pub .go:hover{color:var(--mut)}
 
 
 /* experience */
 .timeline{margin-top:46px;position:relative;padding-left:32px}
-.timeline::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:1px;background:linear-gradient(var(--accent),var(--accent2),transparent)}
+.timeline::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:1px;background:linear-gradient(rgba(255,255,255,.55),rgba(255,255,255,.18),transparent)}
 .tl{position:relative;padding-bottom:36px}
-.tl::before{content:"";position:absolute;left:-32px;top:6px;width:13px;height:13px;border-radius:50%;background:var(--bg);border:2px solid var(--accent)}
-.tl .when{font-family:var(--mono);font-size:.78rem;color:var(--accent2)}
+.tl::before{content:"";position:absolute;left:-32px;top:6px;width:13px;height:13px;border-radius:50%;background:var(--bg);border:2px solid rgba(255,255,255,.7)}
+.tl .when{font-family:var(--mono);font-size:.78rem;color:var(--mut)}
 .tl h3{font-family:var(--serif);font-size:1.22rem;font-weight:500;margin:5px 0 2px}
 .tl .org{color:var(--mut);font-size:.93rem;margin-bottom:10px}
 .tl p{color:var(--soft);font-size:.95rem;font-weight:300;max-width:760px}
@@ -203,18 +205,19 @@ section{position:relative;z-index:2;padding:96px 0}
 .edu h3{font-size:1rem;margin:6px 0 3px;font-weight:600}
 .edu .org{color:var(--mut);font-size:.87rem}
 .honor{margin-top:28px;display:flex;align-items:center;gap:16px;border:1px solid var(--line);border-radius:12px;padding:18px 22px;background:var(--panel)}
-.honor .m{font-size:1.6rem}
-.honor b{color:#e0b25e}
+.honor .m{font-size:1.6rem;filter:grayscale(1) brightness(1.4)}
+.honor b{color:var(--ink)}
 
 /* certifications */
 .cert-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:18px;margin-top:46px}
-.cert{border:1px solid var(--line);border-left:4px solid var(--cb,#5aa2ff);border-radius:12px;padding:26px 28px;background:var(--panel);transition:.26s}
-.cert:hover{transform:translateY(-5px);border-color:rgba(90,162,255,.4);background:rgba(255,255,255,.05)}
-.cert .chip{display:inline-block;font-weight:800;font-size:.84rem;letter-spacing:.01em;padding:7px 14px;border-radius:8px;margin-bottom:15px}
+.cert{border:1px solid var(--line);border-radius:12px;padding:26px 28px;background:var(--panel);transition:.26s}
+.cert:hover{transform:translateY(-5px);border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.05)}
+.cert .chip{display:inline-block;font-weight:600;font-size:.8rem;letter-spacing:.01em;padding:7px 16px;border-radius:9999px;margin-bottom:15px;
+  background:#141414;color:var(--ink);border:1px solid var(--line)}
 .cert h3{font-size:1.16rem;font-weight:700;line-height:1.32;margin-bottom:6px}
 .cert .iss{color:var(--soft);font-size:.92rem;font-weight:500;margin-bottom:13px}
-.cert .view{font-family:var(--mono);font-size:.82rem;font-weight:600;color:var(--accent)}
-.cert .view:hover{color:var(--accent2)}
+.cert .view{font-family:var(--mono);font-size:.82rem;font-weight:600;color:var(--ink)}
+.cert .view:hover{color:var(--mut)}
 .cert-note{margin-top:24px;font-size:.84rem;color:var(--mut);font-style:italic}
 
 /* contact */
@@ -234,8 +237,8 @@ footer .f3d{opacity:.6;font-style:italic}
 .hero-right{position:relative;min-height:440px;display:flex;justify-content:center;align-items:center}
 .avatar-hud{display:none;position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
   font-family:var(--mono);font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--mut);white-space:nowrap}
-.avatar-hud .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent2);
-  margin-right:9px;box-shadow:0 0 10px var(--accent2);animation:pulse 2.2s infinite}
+.avatar-hud .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#fff;
+  margin-right:9px;box-shadow:0 0 10px rgba(255,255,255,.8);animation:pulse 2.2s infinite}
 @keyframes pulse{50%{opacity:.25}}
 .has3d .orbit-stage{display:none}
 .has3d .avatar-hud{display:block}
@@ -252,23 +255,23 @@ footer .f3d{opacity:.6;font-style:italic}
 .ticker-track{display:flex;width:max-content;animation:tick 38s linear infinite}
 .ticker-track span{display:flex;align-items:center;gap:36px;padding:13px 18px;font-family:var(--mono);
   font-size:.73rem;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);white-space:nowrap}
-.ticker-track i{color:var(--accent2);font-style:normal}
+.ticker-track i{color:var(--soft);font-style:normal}
 @keyframes tick{to{transform:translateX(-50%)}}
 
 /* ghost section numbers */
 .sec-head{position:relative}
 .sec-head::before{content:attr(data-num);position:absolute;top:-.52em;left:-.08em;z-index:-1;
   font-family:var(--serif);font-size:clamp(6rem,13vw,9rem);line-height:1;font-weight:500;
-  color:transparent;-webkit-text-stroke:1px rgba(122,170,255,.14);pointer-events:none}
+  color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.09);pointer-events:none}
 
 .facts-photo{width:86px;height:86px;border-radius:50%;display:block;margin-bottom:16px;
-  border:2px solid rgba(90,162,255,.45);box-shadow:0 0 24px rgba(90,162,255,.25)}
+  border:2px solid rgba(255,255,255,.4);box-shadow:0 0 24px rgba(255,255,255,.14)}
 
 /* soft cursor ring (desktop only) */
-#cursor{position:fixed;left:-100px;top:-100px;width:26px;height:26px;border:1.5px solid rgba(111,182,255,.75);
+#cursor{position:fixed;left:-100px;top:-100px;width:26px;height:26px;border:1.5px solid rgba(255,255,255,.65);
   border-radius:50%;pointer-events:none;z-index:200;transform:translate(-50%,-50%);opacity:0;
   transition:width .25s,height .25s,background .25s,opacity .4s;mix-blend-mode:screen}
-#cursor.hot{width:48px;height:48px;background:rgba(90,162,255,.14);border-color:rgba(70,214,196,.8)}
+#cursor.hot{width:48px;height:48px;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.9)}
 @media(hover:none){#cursor{display:none}}
 .proj,.ccard,.cert,.scard{will-change:transform}
 
@@ -434,17 +437,17 @@ footer .f3d{opacity:.6;font-style:italic}
   <div class="code-grid">
     <div class="ccard">
       <div class="top"><div class="repo">iamashkan / Real-Time-Digital-Twin-Generation-on-IOS</div>
-        <div class="langbar"><i style="width:57.2%;background:#5aa2ff"></i><i style="width:36.4%;background:#e0b25e"></i><i style="width:3.8%;background:#46d6c4"></i><i style="width:2.6%;background:#9aa2b6"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#5aa2ff"></span>Swift</span><span><span class="dot" style="background:#e0b25e"></span>JavaScript</span><span><span class="dot" style="background:#46d6c4"></span>HTML</span><span><span class="dot" style="background:#9aa2b6"></span>CSS</span></div></div>
-      <div class="body"><h3>Real-Time Digital Twin Generation on iOS <span class="badge ms" style="display:inline-block;font-family:var(--mono);font-size:.6rem;font-style:normal;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:5px;margin-left:6px;color:#e0b25e;border:1px solid rgba(224,178,94,.4);vertical-align:middle">Under development</span></h3>
+        <div class="langbar"><i style="width:57.2%;background:#e4e4e7"></i><i style="width:36.4%;background:#a1a1aa"></i><i style="width:3.8%;background:#71717a"></i><i style="width:2.6%;background:#52525b"></i></div>
+        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>Swift</span><span><span class="dot" style="background:#a1a1aa"></span>JavaScript</span><span><span class="dot" style="background:#71717a"></span>HTML</span><span><span class="dot" style="background:#52525b"></span>CSS</span></div></div>
+      <div class="body"><h3>Real-Time Digital Twin Generation on iOS <span class="badge ms" style="display:inline-block;font-family:var(--mono);font-size:.6rem;font-style:normal;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:5px;margin-left:6px;color:#a1a1aa;border:1px solid rgba(255,255,255,.22);vertical-align:middle">Under development</span></h3>
         <p>An iOS-first platform that turns an iPhone into an industrial scanning tool. It captures room geometry live with ARKit + RoomPlan, detects and labels equipment on-device with Core ML / Vision, reads nameplates with OCR (fusing labels such as <code>Pump P-101</code>), and visualises scan coverage in real time. Scans export as JSON plus glTF/GLB models, sync to a Node.js + PostgreSQL backend, and are inspectable from a browser dashboard — while an edge gateway binds each scanned asset to real devices over MQTT and other industrial protocols with auditable, confirmation-gated control. Measured data is kept strictly separate from AI-inferred data throughout. Built milestone-by-milestone, each one independently runnable and verifiable.</p>
         <div class="stack"><span>Swift</span><span>ARKit</span><span>RoomPlan</span><span>Core ML</span><span>Vision</span><span>RealityKit</span><span>Node.js</span><span>PostgreSQL</span><span>MQTT</span><span>Digital Twin</span></div>
         <div class="links"><a class="src" href="https://github.com/iamashkan/Real-Time-Digital-Twin-Generation-on-IOS" target="_blank" rel="noopener">View source ↗</a></div></div>
     </div>
     <div class="ccard">
       <div class="top"><div class="repo">iamashkan / Smart-Highway-Lighting</div>
-        <div class="langbar"><i style="width:34.3%;background:#e0b25e"></i><i style="width:30.2%;background:#5aa2ff"></i><i style="width:23.5%;background:#46d6c4"></i><i style="width:4.3%;background:#f34b7d"></i><i style="width:7.7%;background:#9aa2b6"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#5aa2ff"></span>Python</span><span><span class="dot" style="background:#e0b25e"></span>C#</span><span><span class="dot" style="background:#46d6c4"></span>ShaderLab</span><span><span class="dot" style="background:#f34b7d"></span>C++</span></div></div>
+        <div class="langbar"><i style="width:34.3%;background:#a1a1aa"></i><i style="width:30.2%;background:#e4e4e7"></i><i style="width:23.5%;background:#71717a"></i><i style="width:4.3%;background:#3f3f46"></i><i style="width:7.7%;background:#52525b"></i></div>
+        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>Python</span><span><span class="dot" style="background:#a1a1aa"></span>C#</span><span><span class="dot" style="background:#71717a"></span>ShaderLab</span><span><span class="dot" style="background:#3f3f46"></span>C++</span></div></div>
       <div class="body"><h3>Smart Highway Lighting</h3>
         <p>An emergency-aware adaptive lighting system for a 6-lane smart motorway, built simulation-first across the full edge-to-cloud stack. A Python control backend holds the highway at a 30% eco glow and brightens only the luminaires ahead of each detected vehicle — escalating to a 100% safety corridor for ambulances, police and fire trucks — while modelling energy use, CO₂, luminaire health, remaining useful life and Re-X lifecycle decisions with digital product passports. Telemetry streams over MQTT to a Streamlit operations dashboard, a five-node STM32 edge-controller board network (RS485 / CAN) simulated in Wokwi, and a Unity 6 night-highway digital twin — cutting lighting energy by up to 70% versus an always-on baseline.</p>
         <div class="stack"><span>Python</span><span>STM32</span><span>Embedded C++</span><span>MQTT</span><span>Wokwi</span><span>RS485 / CAN</span><span>Unity 6</span><span>C#</span><span>Streamlit</span><span>Digital Twin</span></div>
@@ -452,8 +455,8 @@ footer .f3d{opacity:.6;font-style:italic}
     </div>
     <div class="ccard">
       <div class="top"><div class="repo">iamashkan / UR5e-Circular-Motor-Recovery</div>
-        <div class="langbar"><i style="width:64%;background:#5aa2ff"></i><i style="width:30%;background:#e0b25e"></i><i style="width:6%;background:#9aa2b6"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#5aa2ff"></span>Python</span><span><span class="dot" style="background:#e0b25e"></span>C#</span><span><span class="dot" style="background:#9aa2b6"></span>Dockerfile</span></div></div>
+        <div class="langbar"><i style="width:64%;background:#e4e4e7"></i><i style="width:30%;background:#a1a1aa"></i><i style="width:6%;background:#52525b"></i></div>
+        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>Python</span><span><span class="dot" style="background:#a1a1aa"></span>C#</span><span><span class="dot" style="background:#52525b"></span>Dockerfile</span></div></div>
       <div class="body"><h3>UR5e Circular Motor Recovery</h3>
         <p>A simulation-based, hardware-ready digital twin for robotic recovery (Re-X) of end-of-life electric motors from Dubai's district-cooling infrastructure. A UR5e cobot with a Robotiq 2F-85 gripper sorts eleven separable motor components across reuse / repair / replace / recycle stations in Gazebo; a Python decision engine scores each part's health and risk from a Digital Product Passport and sensor stream, MoveIt 2 plans the 17-step pick-and-place workflow through ros2_control, and a Streamlit dashboard plus a Unity visual twin track every decision.</p>
         <div class="stack"><span>ROS 2 Jazzy</span><span>Gazebo</span><span>MoveIt 2</span><span>UR5e</span><span>Python</span><span>Unity</span><span>C#</span><span>Streamlit</span><span>Digital Twin</span></div>
@@ -461,8 +464,8 @@ footer .f3d{opacity:.6;font-style:italic}
     </div>
     <div class="ccard">
       <div class="top"><div class="repo">iamashkan / Battery-Sorting-in-Digital-Twin</div>
-        <div class="langbar"><i style="width:47.6%;background:#5aa2ff"></i><i style="width:45.6%;background:#e0b25e"></i><i style="width:6.8%;background:#46d6c4"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#5aa2ff"></span>Python</span><span><span class="dot" style="background:#e0b25e"></span>C#</span><span><span class="dot" style="background:#46d6c4"></span>HTML</span></div></div>
+        <div class="langbar"><i style="width:47.6%;background:#e4e4e7"></i><i style="width:45.6%;background:#a1a1aa"></i><i style="width:6.8%;background:#71717a"></i></div>
+        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>Python</span><span><span class="dot" style="background:#a1a1aa"></span>C#</span><span><span class="dot" style="background:#71717a"></span>HTML</span></div></div>
       <div class="body"><h3>Battery Sorting in Digital Twin</h3>
         <p>An operational digital twin for end-of-life lithium-ion battery recovery and robotic sorting. A Unity control twin streams each battery's image to a FastAPI backend that classifies the cell type, looks up NASA-derived state-of-health and scores risk; a decision engine routes every battery to reuse / remanufacture / recycle / quarantine under selectable policy modes, an ABB CRB-style cobot sorts it on the line, and a Streamlit dashboard tracks KPIs and digital product passports. Built on a real RecyBat24 image subset and NASA PCoE battery-aging data.</p>
         <div class="stack"><span>Unity</span><span>C#</span><span>FastAPI</span><span>Python</span><span>scikit-learn</span><span>Computer Vision</span><span>Streamlit</span><span>Digital Twin</span></div>
@@ -470,8 +473,8 @@ footer .f3d{opacity:.6;font-style:italic}
     </div>
     <div class="ccard">
       <div class="top"><div class="repo">iamashkan / solar-sentinel</div>
-        <div class="langbar"><i style="width:97.5%;background:#5aa2ff"></i><i style="width:1.5%;background:#9aa2b6"></i><i style="width:0.6%;background:#e0b25e"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#5aa2ff"></span>Python</span><span><span class="dot" style="background:#9aa2b6"></span>Dockerfile</span><span><span class="dot" style="background:#e0b25e"></span>Shell</span></div></div>
+        <div class="langbar"><i style="width:97.5%;background:#e4e4e7"></i><i style="width:1.5%;background:#52525b"></i><i style="width:0.6%;background:#a1a1aa"></i></div>
+        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>Python</span><span><span class="dot" style="background:#52525b"></span>Dockerfile</span><span><span class="dot" style="background:#a1a1aa"></span>Shell</span></div></div>
       <div class="body"><h3>Solar Sentinel</h3>
         <p>A digital twin of a desert solar farm that inspects every panel with computer vision, predicts energy loss with machine learning, and dispatches a cleaning robot to the highest-value panels under a realistic water budget. A soiling-regression CNN and a ResNet-18 fault classifier feed a gradient-boosted power-loss model; economic triage and 2-opt routing plan the cleaning run, exported to a ROS 2 Nav2 <code>FollowWaypoints</code> goal with a Gazebo physics twin — all served through a FastAPI inference service and a Streamlit dashboard.</p>
         <div class="stack"><span>PyTorch</span><span>OpenCV</span><span>ResNet-18</span><span>Gradient Boosting</span><span>ROS 2 Nav2</span><span>Gazebo</span><span>FastAPI</span><span>Streamlit</span><span>Digital Twin</span></div>
@@ -479,8 +482,8 @@ footer .f3d{opacity:.6;font-style:italic}
     </div>
     <div class="ccard">
       <div class="top"><div class="repo">iamashkan / defect-inspection-digital-twin</div>
-        <div class="langbar"><i style="width:95.1%;background:#5aa2ff"></i><i style="width:2.9%;background:#e0b25e"></i><i style="width:1.5%;background:#9aa2b6"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#5aa2ff"></span>Python</span><span><span class="dot" style="background:#e0b25e"></span>Jupyter</span><span><span class="dot" style="background:#9aa2b6"></span>Dockerfile</span></div></div>
+        <div class="langbar"><i style="width:95.1%;background:#e4e4e7"></i><i style="width:2.9%;background:#a1a1aa"></i><i style="width:1.5%;background:#52525b"></i></div>
+        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>Python</span><span><span class="dot" style="background:#a1a1aa"></span>Jupyter</span><span><span class="dot" style="background:#52525b"></span>Dockerfile</span></div></div>
       <div class="body"><h3>Defect Inspection Digital Twin</h3>
         <p>A simulation-only inspection pipeline for circular manufacturing. A PyTorch model detects surface defects and localizes them with Grad-CAM, an ML grader sorts each part into reuse / repair / recycle with a confidence score, and a digital twin keeps a live record per part — all wired into a ROS 2 (Humble) node graph with a Gazebo inspection cell and RViz, plus a Streamlit dashboard.</p>
         <div class="stack"><span>PyTorch</span><span>OpenCV</span><span>Grad-CAM</span><span>ROS 2</span><span>Gazebo</span><span>Streamlit</span><span>Digital Twin</span></div>
@@ -488,8 +491,8 @@ footer .f3d{opacity:.6;font-style:italic}
     </div>
     <div class="ccard">
       <div class="top"><div class="repo">iamashkan / Semantic-Segmentation-AR</div>
-        <div class="langbar"><i style="width:68.5%;background:#5aa2ff"></i><i style="width:13.9%;background:#46d6c4"></i><i style="width:11.2%;background:#9aa2b6"></i><i style="width:6.4%;background:#e0b25e"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#5aa2ff"></span>ShaderLab</span><span><span class="dot" style="background:#46d6c4"></span>HLSL</span><span><span class="dot" style="background:#e0b25e"></span>C#</span></div></div>
+        <div class="langbar"><i style="width:68.5%;background:#e4e4e7"></i><i style="width:13.9%;background:#71717a"></i><i style="width:11.2%;background:#52525b"></i><i style="width:6.4%;background:#a1a1aa"></i></div>
+        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>ShaderLab</span><span><span class="dot" style="background:#71717a"></span>HLSL</span><span><span class="dot" style="background:#a1a1aa"></span>C#</span></div></div>
       <div class="body"><h3>Semantic Segmentation in AR</h3>
         <p>A real-time, environment-aware AR experience using Niantic Lightship ARDK and Unity. Classifies real-world surfaces — sky, ground, trees, buildings — from the camera feed and drives AR behaviour with custom shaders.</p>
         <div class="stack"><span>Unity3D</span><span>Lightship ARDK</span><span>Shader Graph</span><span>Computer Vision</span></div>
@@ -497,8 +500,8 @@ footer .f3d{opacity:.6;font-style:italic}
     </div>
     <div class="ccard">
       <div class="top"><div class="repo">iamashkan / WebAR-FaceFilter</div>
-        <div class="langbar"><i style="width:55.7%;background:#e0b25e"></i><i style="width:23.8%;background:#5aa2ff"></i><i style="width:20.5%;background:#46d6c4"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#5aa2ff"></span>C#</span><span><span class="dot" style="background:#46d6c4"></span>HTML</span><span><span class="dot" style="background:#e0b25e"></span>Needle</span></div></div>
+        <div class="langbar"><i style="width:55.7%;background:#a1a1aa"></i><i style="width:23.8%;background:#e4e4e7"></i><i style="width:20.5%;background:#71717a"></i></div>
+        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>C#</span><span><span class="dot" style="background:#71717a"></span>HTML</span><span><span class="dot" style="background:#a1a1aa"></span>Needle</span></div></div>
       <div class="body"><h3>WebAR Face Filter</h3>
         <p>A browser-based AR face filter built with Unity and the Needle Engine — real-time face detection and tracking with customizable effects, running cross-platform with no app installation.</p>
         <div class="stack"><span>Unity</span><span>Needle Engine</span><span>WebAR</span><span>Face Tracking</span></div>
@@ -506,8 +509,8 @@ footer .f3d{opacity:.6;font-style:italic}
     </div>
     <div class="ccard">
       <div class="top"><div class="repo">iamashkan / crypto-watchlis-main</div>
-        <div class="langbar"><i style="width:51.5%;background:#5aa2ff"></i><i style="width:40%;background:#46d6c4"></i><i style="width:8.5%;background:#e0b25e"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#5aa2ff"></span>TypeScript</span><span><span class="dot" style="background:#46d6c4"></span>CSS</span><span><span class="dot" style="background:#e0b25e"></span>HTML</span></div></div>
+        <div class="langbar"><i style="width:51.5%;background:#e4e4e7"></i><i style="width:40%;background:#71717a"></i><i style="width:8.5%;background:#a1a1aa"></i></div>
+        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>TypeScript</span><span><span class="dot" style="background:#71717a"></span>CSS</span><span><span class="dot" style="background:#a1a1aa"></span>HTML</span></div></div>
       <div class="body"><h3>Crypto Watchlist</h3>
         <p>A responsive React + TypeScript application for tracking cryptocurrency markets, demonstrating modern front-end development and live API integration.</p>
         <div class="stack"><span>React</span><span>TypeScript</span><span>CSS</span></div>
@@ -515,8 +518,8 @@ footer .f3d{opacity:.6;font-style:italic}
     </div>
     <div class="ccard">
       <div class="top"><div class="repo">iamashkan / CurrencyRateTelegramBot</div>
-        <div class="langbar"><i style="width:100%;background:#5aa2ff"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#5aa2ff"></span>JavaScript</span></div></div>
+        <div class="langbar"><i style="width:100%;background:#e4e4e7"></i></div>
+        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>JavaScript</span></div></div>
       <div class="body"><h3>Market Price Bot</h3>
         <p>A serverless Telegram bot on Cloudflare Workers that posts live foreign-exchange, gold and tether prices to a channel every 15 minutes with a clean Persian (RTL) layout. Each price is tracked against the 23:00 baseline held in Cloudflare KV, a cron trigger drives the schedule, and a nightly summary stores the next day's baseline — and if the data source fails it skips the cycle and alerts the admin rather than posting anything broken.</p>
         <div class="stack"><span>JavaScript</span><span>Cloudflare Workers</span><span>Cloudflare KV</span><span>Telegram Bot API</span><span>Cron Triggers</span></div>
@@ -557,50 +560,50 @@ footer .f3d{opacity:.6;font-style:italic}
     <p class="sec-intro">Professional certificates and specializations in machine learning, deep learning, XR and digital manufacturing.</p>
   </div>
   <div class="cert-grid">
-    <div class="cert" style="--cb:#5aa2ff">
-      <span class="chip" style="background:#111317;color:#fff">Unity Technologies · Verified</span>
+    <div class="cert">
+      <span class="chip">Unity Technologies · Verified</span>
       <h3>Unity Mobile AR Development</h3>
       <div class="iss">Unity Technologies — verified on Credly</div>
       <a class="view" href="https://www.credly.com/badges/e8e5affe-0562-4a71-9635-c77543065f11/public_url" target="_blank" rel="noopener">Verify badge ↗</a>
     </div>
-    <div class="cert" style="--cb:#5aa2ff">
-      <span class="chip" style="background:#111317;color:#fff">Unity Technologies · Verified</span>
+    <div class="cert">
+      <span class="chip">Unity Technologies · Verified</span>
       <h3>Unity Essentials</h3>
       <div class="iss">Unity Technologies — verified on Credly</div>
       <a class="view" href="https://www.credly.com/badges/b325ebc8-999f-4754-bb69-1289ab3b41c7/public_url" target="_blank" rel="noopener">Verify badge ↗</a>
     </div>
-    <div class="cert" style="--cb:#8C1515">
-      <span class="chip" style="background:#8C1515;color:#fff">Stanford University</span>
+    <div class="cert">
+      <span class="chip">Stanford University</span>
       <h3>Machine Learning Specialization</h3>
       <div class="iss">Stanford University &amp; DeepLearning.AI</div>
       <a class="view" href="https://www.coursera.org/account/accomplishments/specialization/certificate/U6XKRB829QJJ" target="_blank" rel="noopener">View credential ↗</a>
     </div>
-    <div class="cert" style="--cb:#0A2A66">
-      <span class="chip" style="background:#0A2A66;color:#fff">DeepLearning.AI</span>
+    <div class="cert">
+      <span class="chip">DeepLearning.AI</span>
       <h3>Deep Learning Specialization</h3>
       <div class="iss">DeepLearning.AI</div>
       <a class="view" href="https://www.coursera.org/account/accomplishments/specialization/certificate/Y3TF4U2UKG4S" target="_blank" rel="noopener">View credential ↗</a>
     </div>
-    <div class="cert" style="--cb:#0f62fe">
-      <span class="chip" style="background:#0f62fe;color:#fff">IBM</span>
+    <div class="cert">
+      <span class="chip">IBM</span>
       <h3>Deep Neural Networks with PyTorch</h3>
       <div class="iss">IBM</div>
       <a class="view" href="https://www.coursera.org/account/accomplishments/certificate/K4RJU7WXUKKX" target="_blank" rel="noopener">View credential ↗</a>
     </div>
-    <div class="cert" style="--cb:#FFCB05">
-      <span class="chip" style="background:#00274C;color:#FFCB05">University of Michigan</span>
+    <div class="cert">
+      <span class="chip">University of Michigan</span>
       <h3>Developing AR/VR/MR/XR Apps with WebXR, Unity &amp; Unreal</h3>
       <div class="iss">University of Michigan</div>
       <a class="view" href="https://www.coursera.org/account/accomplishments/certificate/RX9MP2F9UNSQ" target="_blank" rel="noopener">View credential ↗</a>
     </div>
-    <div class="cert" style="--cb:#FFCB05">
-      <span class="chip" style="background:#00274C;color:#FFCB05">University of Michigan</span>
+    <div class="cert">
+      <span class="chip">University of Michigan</span>
       <h3>Digital Technologies and the Future of Manufacturing</h3>
       <div class="iss">University of Michigan</div>
       <a class="view" href="https://www.coursera.org/account/accomplishments/specialization/certificate/NZJF9DN4UQ4F" target="_blank" rel="noopener">View credential ↗</a>
     </div>
-    <div class="cert" style="--cb:#e0b25e">
-      <span class="chip" style="background:#e0b25e;color:#1a1300">IFIA</span>
+    <div class="cert">
+      <span class="chip">IFIA</span>
       <h3>Member Certificate — "Inv"</h3>
       <div class="iss">International Federation of Inventors' Associations (IFIA)</div>
       <a class="view" href="https://www.ifia.com/ir2023jul1675axa/" target="_blank" rel="noopener">View credential ↗</a>
@@ -705,16 +708,16 @@ const scene=new THREE.Scene();
 const cam=new THREE.PerspectiveCamera(38,innerWidth/innerHeight,.1,60);
 cam.position.set(0,1.35,4.2);
 
-scene.add(new THREE.AmbientLight(0x6688bb,1.1));
-const key=new THREE.DirectionalLight(0x88bbff,1.6);key.position.set(2,4,3);scene.add(key);
+scene.add(new THREE.AmbientLight(0x999999,1.1));
+const key=new THREE.DirectionalLight(0xffffff,1.6);key.position.set(2,4,3);scene.add(key);
 
 const G=new THREE.Group();scene.add(G);
-const under=new THREE.PointLight(0x46d6c4,1.4,7);under.position.set(0,.25,.7);G.add(under);
+const under=new THREE.PointLight(0xcccccc,1.4,7);under.position.set(0,.25,.7);G.add(under);
 
-/* blue transparent body + glowing wireframe mesh */
-const bodyMat=new THREE.MeshStandardMaterial({color:0x16334f,emissive:0x2d6fe8,emissiveIntensity:.55,
+/* silver transparent body + glowing wireframe mesh */
+const bodyMat=new THREE.MeshStandardMaterial({color:0x2a2a2e,emissive:0xb5b5c0,emissiveIntensity:.5,
   metalness:.15,roughness:.45,transparent:true,opacity:.22,depthWrite:true});
-const wireMat=new THREE.MeshBasicMaterial({color:0x6fb6ff,wireframe:true,transparent:true,opacity:.45,
+const wireMat=new THREE.MeshBasicMaterial({color:0xe6e6ea,wireframe:true,transparent:true,opacity:.4,
   blending:THREE.AdditiveBlending,depthWrite:false});
 
 /* ===== per-section "representation modes" for the digital twin =====
@@ -722,7 +725,7 @@ const wireMat=new THREE.MeshBasicMaterial({color:0x6fb6ff,wireframe:true,transpa
    uBlue   : 0→1 blueprint recolor of the hologram (Code / manufacturing section).
    uDiss   : 0→1 disintegration — randomly discards fragments so the body breaks into a point/data cloud (XR).
    uScan   : glow colour of the scan line and dissolve edges. */
-const holoU={uLineY:{value:9},uBand:{value:.16},uScan:{value:new THREE.Color(0x9fd4ff)},
+const holoU={uLineY:{value:9},uBand:{value:.16},uScan:{value:new THREE.Color(0xffffff)},
   uBlue:{value:0},uDiss:{value:0},uTime:{value:0}};
 function heightMask(mat,side){
   const top=side==='top';
@@ -748,8 +751,8 @@ function heightMask(mat,side){
         'float h=fract(sin(dot(floor(vWp*46.0+uTime*0.5),vec3(12.9898,78.233,37.719)))*43758.5453);\n'+
         'if(uDiss>0.001 && h<uDiss) discard;\n'+
         'if(vis<0.02)discard;\n'+fade+'\n'+
-        /* blueprint: push toward technical cyan-on-navy */
-        'gl_FragColor.rgb=mix(gl_FragColor.rgb, gl_FragColor.rgb*vec3(0.30,0.72,1.6)+vec3(0.0,0.05,0.14), uBlue);\n'+
+        /* blueprint: push toward technical bright silver */
+        'gl_FragColor.rgb=mix(gl_FragColor.rgb, gl_FragColor.rgb*vec3(1.25,1.25,1.3)+vec3(0.05,0.05,0.06), uBlue);\n'+
         /* glow on fragments near the dissolve edge so it shimmers as it scatters */
         'gl_FragColor.rgb+=uScan*smoothstep(uDiss+0.06,uDiss,h)*step(0.002,uDiss)*0.9;\n';
     }else{
@@ -773,12 +776,12 @@ const fadeScene=[];
 const reg=m=>fadeScene.push({m,o:m.opacity});
 
 /* holographic floor disc */
-const grid=new THREE.PolarGridHelper(1.05,12,5,64,0x3d7dff,0x1f4a8a);
+const grid=new THREE.PolarGridHelper(1.05,12,5,64,0x8a8a92,0x3a3a40);
 grid.material.transparent=true;grid.material.opacity=.45;grid.material.depthWrite=false;reg(grid.material);
 G.add(grid);
 const glowTex=(()=>{const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');
-  const r=g.createRadialGradient(128,128,0,128,128,128);r.addColorStop(0,'rgba(90,162,255,.9)');
-  r.addColorStop(.4,'rgba(60,120,255,.25)');r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,256,256);
+  const r=g.createRadialGradient(128,128,0,128,128,128);r.addColorStop(0,'rgba(255,255,255,.8)');
+  r.addColorStop(.4,'rgba(255,255,255,.18)');r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,256,256);
   return new THREE.CanvasTexture(c)})();
 const glowMat=new THREE.MeshBasicMaterial({map:glowTex,transparent:true,opacity:.55,blending:THREE.AdditiveBlending,depthWrite:false});
 reg(glowMat);
