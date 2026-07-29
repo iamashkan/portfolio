@@ -790,13 +790,15 @@ glow.rotation.x=-Math.PI/2;glow.position.y=.012;G.add(glow);
 
 /* avatar — humanoid GLB with idle/walk/run, wireframe shell sharing the same skeleton */
 let model=null,mixer=null,mYMin=0,mYH=1;const act={},clipRole={};
-/* clips arrive across several same-rig GLBs (model1=smoke, model5=idle).
+/* clips arrive across several same-rig GLBs (avatar=idle, avatar1=smoke).
+   the avatar exports reuse one clip name for every motion, so a file can declare its
+   role outright; without one, fall back to sniffing the clip name.
    sort each into a role, then (re)build its mixer action as soon as the body exists. */
-function registerClips(anims){
+function registerClips(anims,role){
   (anims||[]).forEach(c=>{const n=c.name.toLowerCase();
-    const role=n.includes('idle')?'idle':n.includes('smok')?'smoke':
-      (n.includes('walk')||n.includes('mixamo'))?'walk':n.includes('run')?'run':null;
-    if(role&&!clipRole[role])clipRole[role]=c;});
+    const r=role||(n.includes('idle')?'idle':n.includes('smok')?'smoke':
+      (n.includes('walk')||n.includes('mixamo'))?'walk':n.includes('run')?'run':null);
+    if(r&&!clipRole[r])clipRole[r]=c;});
   buildActions();
 }
 function buildActions(){
@@ -809,7 +811,7 @@ function buildActions(){
   const base=act.idle||act.smoke||act.walk||act.run;
   if(base&&!Object.values(act).some(a=>a.getEffectiveWeight()>0.001))base.setEffectiveWeight(1);
 }
-function adopt(gltf){
+function adopt(gltf,role){
   const m=gltf.scene;
   const done=new Set(),shells=[];
   m.traverse(o=>{
@@ -833,7 +835,7 @@ function adopt(gltf){
     });
   });
   mixer=new THREE.AnimationMixer(m);
-  registerClips(gltf.animations);
+  registerClips(gltf.animations,role);
   if(RM&&mixer)mixer.update(.03);
   /* measure local height so the scan line can travel feet→head regardless of scroll scale */
   const bb=new THREE.Box3().setFromObject(m);mYMin=bb.min.y;mYH=Math.max(.001,bb.max.y-bb.min.y);
@@ -861,14 +863,22 @@ function mannequin(){ /* offline fallback: capsule humanoid, no skeleton, no hei
   });
   G.add(g);model=g;
 }
-const SRC=['assets/model1.glb','assets/avatar.glb','https://cdn.jsdelivr.net/gh/mrdoob/three.js@r160/examples/models/gltf/Xbot.glb'];
-/* same-rig clip banks merged onto the loaded body so the twin can change motion per section */
-const CLIPS=['assets/model5.glb'];
+/* body candidates in priority order; first one that loads wins, mannequin() is the last resort.
+   role  : which motion the body file's own clip supplies
+   banks : same-rig clip-only GLBs merged onto that body so the twin can change motion per section */
+const SRC=[
+  {url:'assets/avatar.glb',role:'idle',
+   banks:[{url:'assets/avatar1.glb',role:'smoke'}]},
+  {url:'assets/model1.glb',role:null,
+   banks:[{url:'assets/model5.glb',role:null}]},
+  {url:'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r160/examples/models/gltf/Xbot.glb',role:null,banks:[]}
+];
 (function load(i){
   if(i>=SRC.length){mannequin();return;}
-  new GLTFLoader().load(SRC[i],g=>{
-    try{adopt(g);
-      if(i===0)CLIPS.forEach(u=>new GLTFLoader().load(u,e=>registerClips(e.animations),undefined,()=>{}));
+  const src=SRC[i];
+  new GLTFLoader().load(src.url,g=>{
+    try{adopt(g,src.role);
+      src.banks.forEach(b=>new GLTFLoader().load(b.url,e=>registerClips(e.animations,b.role),undefined,()=>{}));
     }catch(e){console.warn(e);mannequin()}
   },undefined,()=>load(i+1));
 })(0);
