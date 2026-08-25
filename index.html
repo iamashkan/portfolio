@@ -432,7 +432,7 @@ footer .f3d{opacity:.6;font-style:italic}
   <div class="sec-head">
     <div class="sec-eyebrow"><b>04</b> — Open Source</div>
     <h2 class="sec-title">Selected code projects</h2>
-    <p class="sec-intro">Open-source work spanning robotics &amp; machine learning, augmented reality, computer vision and web development — part of 85 public repositories.</p>
+    <p class="sec-intro">Open-source work spanning robotics &amp; machine learning, augmented reality, computer vision and web development.</p>
   </div>
   <div class="code-grid">
     <div class="ccard">
@@ -445,20 +445,11 @@ footer .f3d{opacity:.6;font-style:italic}
         <div class="links"><a class="src" href="https://github.com/iamashkan/Real-Time-Digital-Twin-Generation-on-IOS" target="_blank" rel="noopener">View source ↗</a></div></div>
     </div>
     <div class="ccard">
-      <div class="top"><div class="repo">iamashkan / Smart-Highway-Lighting</div>
-        <div class="langbar"><i style="width:34.3%;background:#a1a1aa"></i><i style="width:30.2%;background:#e4e4e7"></i><i style="width:23.5%;background:#71717a"></i><i style="width:4.3%;background:#3f3f46"></i><i style="width:7.7%;background:#52525b"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>Python</span><span><span class="dot" style="background:#a1a1aa"></span>C#</span><span><span class="dot" style="background:#71717a"></span>ShaderLab</span><span><span class="dot" style="background:#3f3f46"></span>C++</span></div></div>
-      <div class="body"><h3>Smart Highway Lighting</h3>
-        <p>An emergency-aware adaptive lighting system for a 6-lane smart motorway, built simulation-first across the full edge-to-cloud stack. A Python control backend holds the highway at a 30% eco glow and brightens only the luminaires ahead of each detected vehicle — escalating to a 100% safety corridor for ambulances, police and fire trucks — while modelling energy use, CO₂, luminaire health, remaining useful life and Re-X lifecycle decisions with digital product passports. Telemetry streams over MQTT to a Streamlit operations dashboard, a five-node STM32 edge-controller board network (RS485 / CAN) simulated in Wokwi, and a Unity 6 night-highway digital twin — cutting lighting energy by up to 70% versus an always-on baseline.</p>
-        <div class="stack"><span>Python</span><span>STM32</span><span>Embedded C++</span><span>MQTT</span><span>Wokwi</span><span>RS485 / CAN</span><span>Unity 6</span><span>C#</span><span>Streamlit</span><span>Digital Twin</span></div>
-        <div class="links"><a class="src" href="https://github.com/iamashkan/Smart-Highway-Lighting" target="_blank" rel="noopener">View source ↗</a></div></div>
-    </div>
-    <div class="ccard">
       <div class="top"><div class="repo">iamashkan / UR5e-Circular-Motor-Recovery</div>
         <div class="langbar"><i style="width:64%;background:#e4e4e7"></i><i style="width:30%;background:#a1a1aa"></i><i style="width:6%;background:#52525b"></i></div>
         <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>Python</span><span><span class="dot" style="background:#a1a1aa"></span>C#</span><span><span class="dot" style="background:#52525b"></span>Dockerfile</span></div></div>
       <div class="body"><h3>UR5e Circular Motor Recovery</h3>
-        <p>A simulation-based, hardware-ready digital twin for robotic recovery (Re-X) of end-of-life electric motors from Dubai's district-cooling infrastructure. A UR5e cobot with a Robotiq 2F-85 gripper sorts eleven separable motor components across reuse / repair / replace / recycle stations in Gazebo; a Python decision engine scores each part's health and risk from a Digital Product Passport and sensor stream, MoveIt 2 plans the 17-step pick-and-place workflow through ros2_control, and a Streamlit dashboard plus a Unity visual twin track every decision.</p>
+        <p>A simulation-based, hardware-ready digital twin for robotic recovery (Re-X) of end-of-life electric motors from Dubai's district-cooling infrastructure. A UR5e cobot with a Robotiq 2F-85 gripper sorts eleven separable motor components across reuse / repair / replace / recycle stations in Gazebo; a Python decision engine scores each part's health and risk from a Digital Product Passport and sensor stream, MoveIt 2 plans the 17-step pick-and-place workflow through ros2_control, and a Streamlit dashboard plus a Unity visual twin track every decision. Today end-of-life motors are mostly shredded with their copper recovered by eddy-current separation, so the real question is the motor size above which a robotic cell beats shredding — which is why the cell is modelled per component rather than per motor. The motion planning, workcell and decision engine are real; perception is currently mocked.</p>
         <div class="stack"><span>ROS 2 Jazzy</span><span>Gazebo</span><span>MoveIt 2</span><span>UR5e</span><span>Python</span><span>Unity</span><span>C#</span><span>Streamlit</span><span>Digital Twin</span></div>
         <div class="links"><a class="src" href="https://github.com/iamashkan/UR5e-Circular-Motor-Recovery" target="_blank" rel="noopener">View source ↗</a></div></div>
     </div>
@@ -467,18 +458,18 @@ footer .f3d{opacity:.6;font-style:italic}
         <div class="langbar"><i style="width:47.6%;background:#e4e4e7"></i><i style="width:45.6%;background:#a1a1aa"></i><i style="width:6.8%;background:#71717a"></i></div>
         <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>Python</span><span><span class="dot" style="background:#a1a1aa"></span>C#</span><span><span class="dot" style="background:#71717a"></span>HTML</span></div></div>
       <div class="body"><h3>Battery Sorting in Digital Twin</h3>
-        <p>An operational digital twin for end-of-life lithium-ion battery recovery and robotic sorting. A Unity control twin streams each battery's image to a FastAPI backend that classifies the cell type, looks up NASA-derived state-of-health and scores risk; a decision engine routes every battery to reuse / remanufacture / recycle / quarantine under selectable policy modes, an ABB CRB-style cobot sorts it on the line, and a Streamlit dashboard tracks KPIs and digital product passports. Built on a real RecyBat24 image subset and NASA PCoE battery-aging data.</p>
+        <p>An operational digital twin for end-of-life lithium-ion battery recovery and robotic sorting, built against the EU Battery Regulation — which makes a digital battery passport mandatory for EV, industrial and light-transport batteries from 18 February 2027. A Unity control twin streams each battery's image to a FastAPI backend that classifies the cell form factor, draws a state-of-health profile from NASA PCoE aging data and scores risk; a decision engine routes every battery to reuse / remanufacture / recycle / quarantine under selectable policy modes, an ABB CRB-style cobot sorts it on the line, and a Streamlit dashboard tracks KPIs and digital product passports. Built on a real RecyBat24 image subset and NASA PCoE battery-aging data. Simulation-only, and deliberately scoped: identifying cell <em>chemistry</em> (LFP vs NMC) requires XRF or spectroscopy in a real plant and is not something an RGB image can do.</p>
         <div class="stack"><span>Unity</span><span>C#</span><span>FastAPI</span><span>Python</span><span>scikit-learn</span><span>Computer Vision</span><span>Streamlit</span><span>Digital Twin</span></div>
         <div class="links"><a class="src" href="https://github.com/iamashkan/Battery-Sorting-in-Digital-Twin" target="_blank" rel="noopener">View source ↗</a></div></div>
     </div>
     <div class="ccard">
-      <div class="top"><div class="repo">iamashkan / solar-sentinel</div>
-        <div class="langbar"><i style="width:97.5%;background:#e4e4e7"></i><i style="width:1.5%;background:#52525b"></i><i style="width:0.6%;background:#a1a1aa"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>Python</span><span><span class="dot" style="background:#52525b"></span>Dockerfile</span><span><span class="dot" style="background:#a1a1aa"></span>Shell</span></div></div>
-      <div class="body"><h3>Solar Sentinel</h3>
-        <p>A digital twin of a desert solar farm that inspects every panel with computer vision, predicts energy loss with machine learning, and dispatches a cleaning robot to the highest-value panels under a realistic water budget. A soiling-regression CNN and a ResNet-18 fault classifier feed a gradient-boosted power-loss model; economic triage and 2-opt routing plan the cleaning run, exported to a ROS 2 Nav2 <code>FollowWaypoints</code> goal with a Gazebo physics twin — all served through a FastAPI inference service and a Streamlit dashboard.</p>
-        <div class="stack"><span>PyTorch</span><span>OpenCV</span><span>ResNet-18</span><span>Gradient Boosting</span><span>ROS 2 Nav2</span><span>Gazebo</span><span>FastAPI</span><span>Streamlit</span><span>Digital Twin</span></div>
-        <div class="links"><a class="src" href="https://github.com/iamashkan/solar-sentinel" target="_blank" rel="noopener">View source ↗</a></div></div>
+      <div class="top"><div class="repo">iamashkan / Smart-Highway-Lighting</div>
+        <div class="langbar"><i style="width:34.3%;background:#a1a1aa"></i><i style="width:30.2%;background:#e4e4e7"></i><i style="width:23.5%;background:#71717a"></i><i style="width:4.3%;background:#3f3f46"></i><i style="width:7.7%;background:#52525b"></i></div>
+        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>Python</span><span><span class="dot" style="background:#a1a1aa"></span>C#</span><span><span class="dot" style="background:#71717a"></span>ShaderLab</span><span><span class="dot" style="background:#3f3f46"></span>C++</span></div></div>
+      <div class="body"><h3>Smart Highway Lighting</h3>
+        <p>An emergency-aware adaptive lighting system for a 6-lane smart motorway, built simulation-first across the full edge-to-cloud stack. The emergency case is the thesis: when an ambulance, police or fire vehicle is detected, the system raises a 100% safety corridor ahead of it, in that direction only. Outside emergencies a Python control backend holds the road at a configurable eco level and brightens just the luminaires ahead of each vehicle, while modelling energy use, CO₂, luminaire health, remaining useful life and Re-X lifecycle decisions with digital product passports. Telemetry streams over MQTT to a Streamlit operations dashboard, a five-node STM32 edge-controller network (RS485 / CAN) simulated in Wokwi, and a Unity 6 night-highway digital twin. Energy savings are measured against an always-on baseline — worth noting that many highway authorities now switch motorway lighting off entirely between midnight and 05:30, a baseline this system does not beat on energy alone.</p>
+        <div class="stack"><span>Python</span><span>STM32</span><span>Embedded C++</span><span>MQTT</span><span>Wokwi</span><span>RS485 / CAN</span><span>Unity 6</span><span>C#</span><span>Streamlit</span><span>Digital Twin</span></div>
+        <div class="links"><a class="src" href="https://github.com/iamashkan/Smart-Highway-Lighting" target="_blank" rel="noopener">View source ↗</a></div></div>
     </div>
     <div class="ccard">
       <div class="top"><div class="repo">iamashkan / defect-inspection-digital-twin</div>
@@ -490,11 +481,19 @@ footer .f3d{opacity:.6;font-style:italic}
         <div class="links"><a class="src" href="https://github.com/iamashkan/defect-inspection-digital-twin" target="_blank" rel="noopener">View source ↗</a></div></div>
     </div>
     <div class="ccard">
+      <div class="top"><div class="repo">iamashkan / CurrencyRateTelegramBot</div>
+        <div class="langbar"><i style="width:100%;background:#e4e4e7"></i></div>
+        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>JavaScript</span></div></div>
+      <div class="body"><h3>Market Price Bot</h3>
+        <p>A serverless Telegram bot on Cloudflare Workers that posts live foreign-exchange, gold and tether prices to a channel every 15 minutes with a clean Persian (RTL) layout. Each price is tracked against the 23:00 baseline held in Cloudflare KV, a cron trigger drives the schedule, and a nightly summary stores the next day's baseline — and if the data source fails it skips the cycle and alerts the admin rather than posting anything broken.</p>
+        <div class="stack"><span>JavaScript</span><span>Cloudflare Workers</span><span>Cloudflare KV</span><span>Telegram Bot API</span><span>Cron Triggers</span></div>
+        <div class="links"><a class="src" href="https://github.com/iamashkan/CurrencyRateTelegramBot" target="_blank" rel="noopener">View source ↗</a></div></div>
+    </div><div class="ccard">
       <div class="top"><div class="repo">iamashkan / Semantic-Segmentation-AR</div>
         <div class="langbar"><i style="width:68.5%;background:#e4e4e7"></i><i style="width:13.9%;background:#71717a"></i><i style="width:11.2%;background:#52525b"></i><i style="width:6.4%;background:#a1a1aa"></i></div>
         <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>ShaderLab</span><span><span class="dot" style="background:#71717a"></span>HLSL</span><span><span class="dot" style="background:#a1a1aa"></span>C#</span></div></div>
       <div class="body"><h3>Semantic Segmentation in AR</h3>
-        <p>A real-time, environment-aware AR experience using Niantic Lightship ARDK and Unity. Classifies real-world surfaces — sky, ground, trees, buildings — from the camera feed and drives AR behaviour with custom shaders.</p>
+        <p>A real-time, environment-aware AR experience using Niantic Lightship ARDK and Unity. Classifies real-world surfaces — sky, ground, trees, buildings — from the camera feed and drives AR behaviour with custom shaders. Built in 2024 on Lightship ARDK 3.x, which Niantic has since retired — lightship.dev was decommissioned in February 2026 and the platform moved to Niantic Spatial NSDK 4.0.</p>
         <div class="stack"><span>Unity3D</span><span>Lightship ARDK</span><span>Shader Graph</span><span>Computer Vision</span></div>
         <div class="links"><a class="src" href="https://github.com/iamashkan/Semantic-Segmentation-using-Unity-and-Niantic-Lightship" target="_blank" rel="noopener">View source ↗</a></div></div>
     </div>
@@ -508,25 +507,16 @@ footer .f3d{opacity:.6;font-style:italic}
         <div class="links"><a class="src" href="https://github.com/iamashkan/WebAR-FaceFilter" target="_blank" rel="noopener">Source</a><a class="live" href="https://webar-facefilter-z1ejzsyz152zin.needle.run/" target="_blank" rel="noopener">Live demo ↗</a></div></div>
     </div>
     <div class="ccard">
-      <div class="top"><div class="repo">iamashkan / crypto-watchlis-main</div>
+      <div class="top"><div class="repo">iamashkan / crypto-watchlist</div>
         <div class="langbar"><i style="width:51.5%;background:#e4e4e7"></i><i style="width:40%;background:#71717a"></i><i style="width:8.5%;background:#a1a1aa"></i></div>
         <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>TypeScript</span><span><span class="dot" style="background:#71717a"></span>CSS</span><span><span class="dot" style="background:#a1a1aa"></span>HTML</span></div></div>
       <div class="body"><h3>Crypto Watchlist</h3>
         <p>A responsive React + TypeScript application for tracking cryptocurrency markets, demonstrating modern front-end development and live API integration.</p>
         <div class="stack"><span>React</span><span>TypeScript</span><span>CSS</span></div>
-        <div class="links"><a class="src" href="https://github.com/iamashkan/crypto-watchlis-main" target="_blank" rel="noopener">View source ↗</a></div></div>
-    </div>
-    <div class="ccard">
-      <div class="top"><div class="repo">iamashkan / CurrencyRateTelegramBot</div>
-        <div class="langbar"><i style="width:100%;background:#e4e4e7"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>JavaScript</span></div></div>
-      <div class="body"><h3>Market Price Bot</h3>
-        <p>A serverless Telegram bot on Cloudflare Workers that posts live foreign-exchange, gold and tether prices to a channel every 15 minutes with a clean Persian (RTL) layout. Each price is tracked against the 23:00 baseline held in Cloudflare KV, a cron trigger drives the schedule, and a nightly summary stores the next day's baseline — and if the data source fails it skips the cycle and alerts the admin rather than posting anything broken.</p>
-        <div class="stack"><span>JavaScript</span><span>Cloudflare Workers</span><span>Cloudflare KV</span><span>Telegram Bot API</span><span>Cron Triggers</span></div>
-        <div class="links"><a class="src" href="https://github.com/iamashkan/CurrencyRateTelegramBot" target="_blank" rel="noopener">View source ↗</a></div></div>
+        <div class="links"><a class="src" href="https://github.com/iamashkan/crypto-watchlist" target="_blank" rel="noopener">View source ↗</a></div></div>
     </div>
   </div>
-  <a class="gh-all" href="https://github.com/iamashkan" target="_blank" rel="noopener">View all 85 repositories on GitHub →</a>
+  <a class="gh-all" href="https://github.com/iamashkan" target="_blank" rel="noopener">View all repositories on GitHub →</a>
 </div></section>
 
 <!-- EXPERIENCE -->
