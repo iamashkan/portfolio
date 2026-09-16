@@ -268,8 +268,14 @@ footer .f3d{opacity:.6;font-style:italic}
   font-family:var(--serif);font-size:clamp(6rem,13vw,9rem);line-height:1;font-weight:500;
   color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.09);pointer-events:none}
 
-.facts-photo{width:86px;height:86px;border-radius:50%;display:block;margin-bottom:16px;
-  border:2px solid rgba(255,255,255,.4);box-shadow:0 0 24px rgba(255,255,255,.14)}
+/* the studio backdrop is near-white and this page is not: greyscale plus a slight pull-down
+   settles it into the panel, and a gradient hands the bottom edge back to the card. */
+.facts-portrait{position:relative;margin:-26px -26px 18px;border-radius:14px 14px 0 0;overflow:hidden;
+  aspect-ratio:3/4;background:#111}
+.facts-portrait img{width:100%;height:100%;object-fit:cover;object-position:50% 20%;display:block;
+  filter:grayscale(1) contrast(1.06) brightness(.82)}
+.facts-portrait::after{content:"";position:absolute;inset:auto 0 0 0;height:42%;
+  background:linear-gradient(to bottom,transparent,#0a0a0a)}
 
 /* soft cursor ring (desktop only) */
 #cursor{position:fixed;left:-100px;top:-100px;width:26px;height:26px;border:1.5px solid rgba(255,255,255,.65);
@@ -383,7 +389,9 @@ footer .f3d{opacity:.6;font-style:italic}
       <p>He holds an MSc in Digital Electronic Systems and a BSc in Electrical &amp; Electronics Engineering from the University of Guilan, and is a gold-medal-winning member of the International Federation of Inventors' Associations (IFIA).</p>
     </div>
     <div class="facts">
-      <img class="facts-photo" src="assets/portrait_circle.webp" width="420" height="420" loading="lazy" decoding="async" alt="Ashkan Aghamoali">
+      <figure class="facts-portrait">
+        <img src="assets/portrait_full.webp" width="675" height="900" loading="lazy" decoding="async" alt="Ashkan Aghamoali">
+      </figure>
       <div class="row"><span class="k">Role</span><span class="v">XR Developer / Digital Twin Engineer</span></div>
       <div class="row"><span class="k">Affiliation</span><span class="v">LSBU — MI Research Group</span></div>
       <div class="row"><span class="k">Location</span><span class="v">Dubai, UAE</span></div>
