@@ -308,6 +308,26 @@ footer .f3d{opacity:.6;font-style:italic}
 @media(hover:none){#cursor{display:none}}
 .proj,.ccard,.cert,.scard{will-change:transform}
 
+/* WebKit charges far more for a large blur than Blink does, and every blur on this page sits
+   on a fixed or continuously animating element — so iOS re-rasterises them on each scroll
+   frame. The worst is a 120px blur on a fixed orb; the tag pills are worse still, because a
+   backdrop-filter over a playing video forces a readback every frame, six times over. Phones
+   get the same look painted with gradients, which cost nothing, and no layer promotion for
+   cards a finger can never hover. */
+@media(max-width:900px){
+  .bg-orb{filter:none;opacity:.055;
+    background:radial-gradient(circle,rgba(255,255,255,.6),rgba(255,255,255,.18) 45%,transparent 70%)}
+  .bg-grid::after{filter:none;opacity:.72}
+  .showcase3d::before{display:none}
+  .screen3d{animation:none;will-change:auto}
+  nav.scrolled{background:#000;backdrop-filter:none}
+  .proj .tagpill{backdrop-filter:none;background:rgba(0,0,0,.88)}
+  .avatar-hud{backdrop-filter:none;background:rgba(0,0,0,.85)}
+}
+@media(hover:none){
+  .proj,.ccard,.cert,.scard{will-change:auto}
+}
+
 @media(max-width:900px){
   .hero-grid{grid-template-columns:1fr;gap:30px}
   .hero-right{order:-1;min-height:300px}
