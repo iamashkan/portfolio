@@ -629,8 +629,22 @@ footer .f3d{opacity:.6;font-style:italic}
 
 <script>
 const nav=document.getElementById('nav'),prog=document.getElementById('progress');
-addEventListener('scroll',()=>{nav.classList.toggle('scrolled',scrollY>30);
-  const m=document.body.scrollHeight-innerHeight;prog.style.width=(scrollY/m*100)+'%';});
+/* one rAF-throttled scroll handler for the whole page. Reading body.scrollHeight inside a
+   scroll listener forces a synchronous layout on every event, which is what makes a long page
+   feel like treacle on a phone — so measure it once, and again only when it can have changed. */
+let docH=1;
+function measureDoc(){docH=Math.max(1,document.body.scrollHeight-innerHeight)}
+addEventListener('resize',measureDoc);addEventListener('load',measureDoc);measureDoc();
+let scrollQueued=false;
+addEventListener('scroll',()=>{
+  if(scrollQueued)return;scrollQueued=true;
+  requestAnimationFrame(()=>{
+    scrollQueued=false;
+    nav.classList.toggle('scrolled',scrollY>30);
+    prog.style.width=(scrollY/docH*100)+'%';
+    revealBackstop();
+  });
+},{passive:true});
 /* reveal on enter — height-independent trigger: a % threshold can never fire for a section
    taller than viewport/threshold (a tall #code maxes out ~0.15 ratio), leaving it stuck hidden.
    threshold:0 + a bottom rootMargin reveals each section once its top scrolls a fixed slice in. */
@@ -639,12 +653,13 @@ document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 /* belt and braces: whatever the observer misses, reveal once it is plainly on screen.
    a blank section is a far worse failure than an un-animated one. */
 function revealBackstop(){
+  let hit=false;
   document.querySelectorAll('.reveal:not(.in)').forEach(el=>{
-    if(el.getBoundingClientRect().top<innerHeight*.95)el.classList.add('in');
+    if(el.getBoundingClientRect().top<innerHeight*.95){el.classList.add('in');hit=true}
   });
+  if(hit)measureDoc();
 }
-addEventListener('scroll',revealBackstop,{passive:true});
-addEventListener('load',()=>setTimeout(revealBackstop,1200));
+addEventListener('load',()=>setTimeout(revealBackstop,800));
 
 /* the six recordings are the heaviest thing in the document, and all of them used to be
    fetched before the hero had finished painting. Attach the source only once a card is within
@@ -711,13 +726,24 @@ if(fine&&!reduceMotion){
 </script>
 <script type="module">
 /* ===== holographic digital twin — blue transparent wireframe avatar that walks with scroll ===== */
-import * as THREE from 'three';
-import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+/* three.js is roughly 300 KB gzipped and none of it is needed to read the page, so it is
+   pulled in dynamically from inside boot() rather than as a static import — a static one
+   would be fetched during the initial load even though the scene itself is deferred. */
+let THREE,GLTFLoader;
 
 const canvas=document.getElementById('scene3d');
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* phones and metered links get the lighter body file, no multisampling and a capped pixel
+   ratio: a full-screen buffer at DPR 3 with MSAA is most of a phone's GPU budget. */
+const LIGHT=innerWidth<861||(navigator.connection||{}).saveData===true;
 let renderer=null;
-try{renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});}
+/* Standing up WebGL costs a shader compile that can lock a phone's main thread for a second or
+   more, and not one pixel of it is content. Hold the whole scene back until the page has loaded
+   and gone idle, so the text, the cards and the CV link are all usable first. */
+async function boot(){
+[THREE,{GLTFLoader}]=await Promise.all([import('three'),import('three/addons/loaders/GLTFLoader.js')]);
+try{renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:!LIGHT,
+  powerPreference:LIGHT?'low-power':'high-performance'});}
 catch(e){console.warn('3D hologram disabled:',e);}
 if(renderer){
 
@@ -885,15 +911,11 @@ function mannequin(){ /* offline fallback: capsule humanoid, no skeleton, no hei
    role  : which motion the body file's own clip supplies
    banks : same-rig clip-only GLBs merged onto that body so the twin can change motion per section */
 const SRC=[
-  {url:'assets/avatar.glb',role:'idle',
+  {url:LIGHT?'assets/avatar-lite.glb':'assets/avatar.glb',role:'idle',
    banks:[{url:'assets/avatar1.glb',role:'smoke'}]}
 ];
-/* the body file is 7 MB — by far the heaviest asset here. Phones draw the avatar small and
-   dimmed, and a metered connection should never pay for it, so both get the procedural
-   mannequin instead: same hologram, zero bytes. Everyone else loads it, but only after the
-   page has painted and gone idle, so it never competes with the hero for bandwidth. */
-const conn=navigator.connection||{};
-const lightAvatar=innerWidth<861||conn.saveData===true||/(^|-)2g$/.test(conn.effectiveType||'');
+/* the body arrives after the scene is already running: grid and glow come up first and the
+   avatar fades in through appA the moment it lands, so a slow link never holds up the hero. */
 function loadAvatar(i){
   if(i>=SRC.length){mannequin();return;}
   const src=SRC[i];
@@ -903,12 +925,7 @@ function loadAvatar(i){
     }catch(e){console.warn(e);mannequin()}
   },undefined,()=>loadAvatar(i+1));
 }
-if(lightAvatar){mannequin();}
-else{
-  const go=()=>{const idle=window.requestIdleCallback||(f=>setTimeout(f,200));
-    idle(()=>loadAvatar(0),{timeout:1500});};
-  if(document.readyState==='complete')go();else addEventListener('load',go);
-}
+loadAvatar(0);
 
 /* scroll choreography — waypoints per section.
    fx: x as fraction of visible half-width · s: scale · dim: brightness
@@ -943,11 +960,18 @@ function sample(sy){
   const mode={real:L(a.real,b.real,u),blue:L(a.blue,b.blue,u),diss:L(a.diss,b.diss,u),
     animA:a.anim,animB:b.anim,au:u};
   const halfW=Math.tan(cam.fov*Math.PI/360)*cam.position.z*cam.aspect;
-  return innerWidth<861?{x:0,s:s*.85,dim:d*.35,...mode}:{x:fx*halfW,s,dim:d,...mode};
+  if(innerWidth>=861)return{x:fx*halfW,s,dim:d,...mode};
+  /* on a phone the avatar cannot step aside — there is no side column, so the hero text
+     scrolls straight over it. Squaring `real` keeps the photoreal figure at the very top,
+     where it has the screen to itself, then drops it to a faint wireframe as soon as copy
+     starts passing across it: still the avatar, no longer competing with the words. The
+     fourth power is steep on purpose — the scan line clears the head first and the torso
+     last, and the torso is exactly what the summary paragraph scrolls across. */
+  return{x:0,s:s*.8,dim:d*.3,...mode,real:Math.pow(mode.real,4)};
 }
 function onResize(){
   renderer.setSize(innerWidth,innerHeight,false);
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setPixelRatio(Math.min(devicePixelRatio,LIGHT?1.5:2));
   cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();
   buildTrack();
 }
@@ -1013,6 +1037,10 @@ function frame(){
 }
 frame();
 }
+}
+const startHolo=()=>{const idle=window.requestIdleCallback||(f=>setTimeout(f,60));
+  idle(()=>boot().catch(e=>console.warn('3D hologram disabled:',e)),{timeout:1200});};
+if(document.readyState==='complete')startHolo();else addEventListener('load',startHolo);
 </script>
 </body>
 </html>
