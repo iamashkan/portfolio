@@ -100,7 +100,11 @@ section{position:relative;z-index:2;padding:96px 0}
 .sec-eyebrow b{color:var(--ink)}
 .sec-title{font-family:var(--serif);font-weight:500;font-size:clamp(1.9rem,4vw,2.7rem);letter-spacing:-.3px;line-height:1.1;margin-bottom:14px}
 .sec-intro{color:var(--mut);font-size:1.04rem;font-weight:300}
-.reveal{opacity:0;transform:perspective(900px) rotateX(7deg) translateY(34px);transform-origin:center top;transition:.85s cubic-bezier(.2,.7,.2,1)}
+/* reveal used to tilt each block with perspective(900px) rotateX(7deg). On a phone a section
+   is tall enough that its far edge sits ~850px back — almost exactly the perspective distance —
+   so the projected box blew the document out to 117,000px and the observer never fired: every
+   section below the hero stayed at opacity 0. A flat rise does the same job and cannot diverge. */
+.reveal{opacity:0;transform:translateY(34px);transform-origin:center top;transition:.85s cubic-bezier(.2,.7,.2,1)}
 .reveal.in{opacity:1;transform:none}
 
 /* about */
@@ -124,7 +128,7 @@ section{position:relative;z-index:2;padding:96px 0}
 .proj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:22px;margin-top:46px}
 .proj{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel);transition:.3s}
 .proj:hover{transform:translateY(-6px);border-color:rgba(255,255,255,.25)}
-.proj .vid{position:relative}
+.proj .vid{position:relative;background:#0e0e11}
 .proj video{width:100%;display:block;aspect-ratio:640/296;object-fit:cover;background:#050505}
 .proj .tagpill{position:absolute;top:12px;left:12px;font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;
   background:rgba(0,0,0,.75);backdrop-filter:blur(6px);color:var(--soft);padding:4px 12px;border-radius:9999px;border:1px solid var(--line)}
@@ -330,7 +334,7 @@ footer .f3d{opacity:.6;font-style:italic}
   </div>
   <div class="hero-right">
     <div class="orbit-stage">
-      <div class="portrait" id="heroPortrait"><img src="assets/portrait_circle.png" alt="Portrait of Ashkan Aghamoali"></div>
+      <div class="portrait" id="heroPortrait"><img src="assets/portrait_circle.webp" width="420" height="420" decoding="async" alt="Portrait of Ashkan Aghamoali"></div>
     </div>
     <div class="avatar-hud" aria-hidden="true"><span class="dot"></span>Digital twin · it walks as you scroll</div>
   </div>
@@ -351,17 +355,17 @@ footer .f3d{opacity:.6;font-style:italic}
     <p class="sec-intro">Six AR applications built at LSBU for putting machine-learning predictions, simulations and parametric models into the room with the engineer. Every one below is a screen recording of the running app.</p>
   </div>
   <div class="proj-grid">
-    <div class="proj"><div class="vid"><span class="tagpill">ML in AR</span><video src="assets/demo_g2.mp4" poster="assets/demo_g2.jpg" autoplay muted loop playsinline></video></div>
+    <div class="proj"><div class="vid"><span class="tagpill">ML in AR</span><video data-src="assets/demo_g2.mp4" data-poster="assets/demo_g2.jpg" autoplay muted loop playsinline preload="none"></video></div>
       <div class="body"><h3>Neural Network Prediction Interface</h3><p>An AR panel that takes design parameters through an in-scene keypad and returns neural-network predictions of structural deformation, shown as live metrics and charts.</p><div class="stack"><span>Machine Learning</span><span>Unity3D</span><span>C#</span></div></div></div>
-    <div class="proj"><div class="vid"><span class="tagpill">Parametric</span><video src="assets/demo_g1.mp4" poster="assets/demo_g1.jpg" autoplay muted loop playsinline></video></div>
+    <div class="proj"><div class="vid"><span class="tagpill">Parametric</span><video data-src="assets/demo_g1.mp4" data-poster="assets/demo_g1.jpg" autoplay muted loop playsinline preload="none"></video></div>
       <div class="body"><h3>Parametric Control Panel in AR</h3><p>Real-time tuning of a lattice structure's parameters — density, radius, height, thickness — through an immersive AR control panel.</p><div class="stack"><span>Unity3D</span><span>Parametric Design</span><span>ARKit</span></div></div></div>
-    <div class="proj"><div class="vid"><span class="tagpill">Bio-inspired</span><video src="assets/demo_g4.mp4" poster="assets/demo_g4.jpg" autoplay muted loop playsinline></video></div>
+    <div class="proj"><div class="vid"><span class="tagpill">Bio-inspired</span><video data-src="assets/demo_g4.mp4" data-poster="assets/demo_g4.jpg" autoplay muted loop playsinline preload="none"></video></div>
       <div class="body"><h3>Bio-Inspired Structure in AR</h3><p>Interactive visualisation of a biomimetic structure in augmented reality, with live controls to morph its geometry and explore design variations.</p><div class="stack"><span>Unity3D</span><span>Biomimetics</span><span>AR</span></div></div></div>
-    <div class="proj"><div class="vid"><span class="tagpill">Visualisation</span><video src="assets/demo_explain.mp4" poster="assets/demo_explain.jpg" autoplay muted loop playsinline></video></div>
+    <div class="proj"><div class="vid"><span class="tagpill">Visualisation</span><video data-src="assets/demo_explain.mp4" data-poster="assets/demo_explain.jpg" autoplay muted loop playsinline preload="none"></video></div>
       <div class="body"><h3>Step-by-Step AR Explanation</h3><p>An immersive walkthrough presenting a bio-inspired structure and its simulation results, anchored in the user's environment.</p><div class="stack"><span>Unity3D</span><span>AR</span><span>3D Visualisation</span></div></div></div>
-    <div class="proj"><div class="vid"><span class="tagpill">Robotics in AR</span><video src="assets/demo_cobot.mp4" poster="assets/demo_cobot.jpg" autoplay muted loop playsinline></video></div>
+    <div class="proj"><div class="vid"><span class="tagpill">Robotics in AR</span><video data-src="assets/demo_cobot.mp4" data-poster="assets/demo_cobot.jpg" autoplay muted loop playsinline preload="none"></video></div>
       <div class="body"><h3>AR Co-bot Interface</h3><p>An augmented-reality interface for collaborative-robot visualisation, linking digital simulation with physical automation.</p><div class="stack"><span>AR</span><span>Robotics</span><span>Unity3D</span></div></div></div>
-    <div class="proj"><div class="vid"><span class="tagpill">Robotics in AR</span><video src="assets/demo_g5.mp4" poster="assets/demo_g5.jpg" autoplay muted loop playsinline></video></div>
+    <div class="proj"><div class="vid"><span class="tagpill">Robotics in AR</span><video data-src="assets/demo_g5.mp4" data-poster="assets/demo_g5.jpg" autoplay muted loop playsinline preload="none"></video></div>
       <div class="body"><h3>Real-Time Robotic Joint Visualisation</h3><p>An AR scene visualising a robotic joint in real time alongside sensor/data overlays — bridging simulation data and physical motion.</p><div class="stack"><span>AR</span><span>Robotics</span><span>Unity3D</span></div></div></div>
   </div>
 </div></section>
@@ -379,7 +383,7 @@ footer .f3d{opacity:.6;font-style:italic}
       <p>He holds an MSc in Digital Electronic Systems and a BSc in Electrical &amp; Electronics Engineering from the University of Guilan, and is a gold-medal-winning member of the International Federation of Inventors' Associations (IFIA).</p>
     </div>
     <div class="facts">
-      <img class="facts-photo" src="assets/portrait_circle.png" alt="Ashkan Aghamoali">
+      <img class="facts-photo" src="assets/portrait_circle.webp" width="420" height="420" loading="lazy" decoding="async" alt="Ashkan Aghamoali">
       <div class="row"><span class="k">Role</span><span class="v">XR Developer / Digital Twin Engineer</span></div>
       <div class="row"><span class="k">Affiliation</span><span class="v">LSBU — MI Research Group</span></div>
       <div class="row"><span class="k">Location</span><span class="v">Dubai, UAE</span></div>
@@ -632,6 +636,29 @@ addEventListener('scroll',()=>{nav.classList.toggle('scrolled',scrollY>30);
    threshold:0 + a bottom rootMargin reveals each section once its top scrolls a fixed slice in. */
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:0,rootMargin:'0px 0px -12% 0px'});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+/* belt and braces: whatever the observer misses, reveal once it is plainly on screen.
+   a blank section is a far worse failure than an un-animated one. */
+function revealBackstop(){
+  document.querySelectorAll('.reveal:not(.in)').forEach(el=>{
+    if(el.getBoundingClientRect().top<innerHeight*.95)el.classList.add('in');
+  });
+}
+addEventListener('scroll',revealBackstop,{passive:true});
+addEventListener('load',()=>setTimeout(revealBackstop,1200));
+
+/* the six recordings are the heaviest thing in the document, and all of them used to be
+   fetched before the hero had finished painting. Attach the source only once a card is within
+   a screen of the viewport, then hand the element back to its own autoplay attribute — driving
+   play()/pause() from the observer as well turned out to be flaky, since the promise can still
+   be resolving while the card scrolls back out of range. */
+const vio=new IntersectionObserver(es=>es.forEach(e=>{
+  if(!e.isIntersecting)return;
+  const v=e.target;
+  if(v.dataset.poster){v.setAttribute('poster',v.dataset.poster);delete v.dataset.poster;}
+  if(v.dataset.src){v.setAttribute('src',v.dataset.src);delete v.dataset.src;}
+  vio.unobserve(v);
+}),{rootMargin:'600px 0px'});
+document.querySelectorAll('video[data-src]').forEach(v=>vio.observe(v));
 
 /* scroll-driven portrait drift (fallback only) */
 const heroPortrait=document.getElementById('heroPortrait');
@@ -861,15 +888,27 @@ const SRC=[
   {url:'assets/avatar.glb',role:'idle',
    banks:[{url:'assets/avatar1.glb',role:'smoke'}]}
 ];
-(function load(i){
+/* the body file is 7 MB — by far the heaviest asset here. Phones draw the avatar small and
+   dimmed, and a metered connection should never pay for it, so both get the procedural
+   mannequin instead: same hologram, zero bytes. Everyone else loads it, but only after the
+   page has painted and gone idle, so it never competes with the hero for bandwidth. */
+const conn=navigator.connection||{};
+const lightAvatar=innerWidth<861||conn.saveData===true||/(^|-)2g$/.test(conn.effectiveType||'');
+function loadAvatar(i){
   if(i>=SRC.length){mannequin();return;}
   const src=SRC[i];
   new GLTFLoader().load(src.url,g=>{
     try{adopt(g,src.role);
       src.banks.forEach(b=>new GLTFLoader().load(b.url,e=>registerClips(e.animations,b.role),undefined,()=>{}));
     }catch(e){console.warn(e);mannequin()}
-  },undefined,()=>load(i+1));
-})(0);
+  },undefined,()=>loadAvatar(i+1));
+}
+if(lightAvatar){mannequin();}
+else{
+  const go=()=>{const idle=window.requestIdleCallback||(f=>setTimeout(f,200));
+    idle(()=>loadAvatar(0),{timeout:1500});};
+  if(document.readyState==='complete')go();else addEventListener('load',go);
+}
 
 /* scroll choreography — waypoints per section.
    fx: x as fraction of visible half-width · s: scale · dim: brightness
