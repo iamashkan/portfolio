@@ -8,10 +8,23 @@
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="mask-icon" href="assets/favicon.svg" color="#ffffff">
 <meta name="theme-color" content="#000000">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preload" href="assets/fonts/newsreader-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+/* The Google Fonts stylesheet used to be the one render-blocking request on the page: a DNS
+   lookup and TLS handshake to fonts.googleapis.com, then a second pair to fonts.gstatic.com
+   before a single pixel could be painted. On a phone that is most of a second of blank screen.
+   These are the same faces, self-hosted on this origin, cut to the characters the page uses
+   and with the optical-size axis pinned — 123 KB against 260 KB, none of it blocking. */
+@font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;
+  src:url('assets/fonts/inter-var.woff2') format('woff2')}
+@font-face{font-family:'Newsreader';font-style:normal;font-weight:200 800;font-display:swap;
+  src:url('assets/fonts/newsreader-var.woff2') format('woff2')}
+@font-face{font-family:'Newsreader';font-style:italic;font-weight:400;font-display:swap;
+  src:url('assets/fonts/newsreader-var-italic.woff2') format('woff2')}
+@font-face{font-family:'Space Grotesk';font-style:normal;font-weight:300 700;font-display:swap;
+  src:url('assets/fonts/grotesk-var.woff2') format('woff2')}
+
 :root{
   --bg:#000; --bg2:#0a0a0a;
   --ink:#fafafa; --mut:#a1a1aa; --soft:#d4d4d8;
@@ -710,14 +723,17 @@ if(heroPortrait&&!reduceMotion) portraitFrame();
 const fine=matchMedia('(hover:hover) and (pointer:fine)').matches;
 document.querySelectorAll('.sec-head').forEach(h=>{const b=h.querySelector('.sec-eyebrow b');if(b)h.dataset.num=b.textContent.trim()});
 const h1=document.querySelector('header h1');
-if(h1&&!reduceMotion){
+/* the cascade starts every letter at opacity 0 and staggers them, so on a phone the name
+   was blank for over a second on top of whatever the network was doing. Desktop keeps it,
+   a touch quicker; narrow screens get the name painted with the rest of the page. */
+if(h1&&!reduceMotion&&innerWidth>=861){
   const txt=h1.textContent;h1.setAttribute('aria-label',txt);h1.textContent='';
   let li=0;
   txt.split(' ').forEach((word,wi)=>{
     if(wi){h1.appendChild(document.createTextNode(' '));li++;}
     const wrap=document.createElement('span');wrap.style.display='inline-block';wrap.setAttribute('aria-hidden','true');
     [...word].forEach(ch=>{const s=document.createElement('span');s.className='ltr';
-      s.textContent=ch;s.style.animationDelay=(.15+li*.04)+'s';li++;wrap.appendChild(s)});
+      s.textContent=ch;s.style.animationDelay=(.1+li*.028)+'s';li++;wrap.appendChild(s)});
     h1.appendChild(wrap);
   });
 }
@@ -739,8 +755,8 @@ if(fine&&!reduceMotion){
 <script type="importmap">
 {
   "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    "three": "./assets/vendor/three.module.js",
+    "three/addons/": "./assets/vendor/jsm/"
   }
 }
 </script>
