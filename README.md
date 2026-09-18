@@ -47,11 +47,14 @@ I build Python-based automation around CAE / Abaqus simulations, train machine-l
 
 | Project | Description |
 | --- | --- |
-| [**Real-Time Digital Twin Generation on iOS**](https://github.com/iamashkan/Real-Time-Digital-Twin-Generation-on-IOS) | Scans an industrial site with ARKit + RoomPlan, then binds each scanned asset to a real device over MQTT / Modbus / BACnet / OPC-UA. Swift · Core ML · Node.js. |
-| [**UR5e Circular Motor Recovery**](https://github.com/iamashkan/UR5e-Circular-Motor-Recovery) | A UR5e cobot cell that recovers end-of-life electric motors into reuse / repair / replace / recycle. ROS 2 Jazzy · Gazebo · MoveIt 2 · Unity. |
-| [**Battery Sorting in Digital Twin**](https://github.com/iamashkan/Battery-Sorting-in-Digital-Twin) | Re-X routing and digital product passports for end-of-life lithium-ion batteries, built against the EU battery-passport mandate. Unity · FastAPI · Streamlit. |
-| [**Smart Highway Lighting**](https://github.com/iamashkan/Smart-Highway-Lighting) | Emergency-aware adaptive motorway lighting — a full-brightness safety corridor for emergency vehicles. Python · MQTT · STM32 · Unity 6. |
-| [**Market Price Bot**](https://github.com/iamashkan/CurrencyRateTelegramBot) | Serverless Telegram bot on Cloudflare Workers posting live FX, gold and USDT prices with a Persian RTL layout. |
+| **Real-Time Digital Twin Generation on iOS** | Scans an industrial site with ARKit + RoomPlan, then binds each scanned asset to a real device over MQTT / Modbus / BACnet / OPC-UA. Measured data is kept strictly separate from AI-inferred data. Swift · Core ML · Node.js. |
+| **UR5e Circular Motor Recovery** | A UR5e cobot cell that recovers end-of-life electric motors into reuse / repair / replace / recycle — modelled per component, because the question that matters is the motor size above which this beats shredding. ROS 2 Jazzy · Gazebo · MoveIt 2 · Unity. |
+| **Battery Sorting in Digital Twin** | Re-X routing and digital product passports for end-of-life lithium-ion batteries, built against the EU battery-passport mandate. Unity · FastAPI · Streamlit. |
+| **Smart Highway Lighting** | Emergency-aware adaptive motorway lighting — a full-brightness safety corridor for emergency vehicles. Python · MQTT · STM32 · Unity 6. |
+| **Market Price Bot** | Serverless Telegram bot on Cloudflare Workers posting live FX, gold and USDT prices with a Persian RTL layout. |
+
+Source for these is kept in private repositories while the work is in progress. Full
+write-ups — including the limits each system ran into — are on the live portfolio.
 
 More on the [live portfolio](https://iamashkan.github.io/portfolio/) and on [GitHub](https://github.com/iamashkan?tab=repositories).
 

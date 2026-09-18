@@ -179,31 +179,62 @@ section{position:relative;z-index:2;padding:96px 0}
 @keyframes float3d{0%,100%{transform:rotateX(12deg) rotateY(-18deg) translateY(0)}50%{transform:rotateX(7deg) rotateY(16deg) translateY(-14px)}}
 .showcase-cap{text-align:center;color:var(--mut);font-size:.85rem;margin:0 0 8px;font-style:italic;position:relative;z-index:1}
 
-/* code */
-.code-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:22px;margin-top:46px}
-.ccard{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel);transition:.3s}
-.ccard:hover{transform:translateY(-6px);border-color:rgba(255,255,255,.25)}
-.ccard .top{padding:22px 22px 18px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--line)}
-.ccard .repo{font-family:var(--mono);font-size:.8rem;color:var(--soft);word-break:break-all}
-.ccard .langbar{display:flex;height:5px;border-radius:5px;overflow:hidden;margin-top:14px;background:rgba(255,255,255,.06)}
-.ccard .langbar i{height:100%}
-.ccard .langs2{display:flex;flex-wrap:wrap;gap:12px;margin-top:9px}
-.ccard .langs2 span{font-size:.73rem;color:var(--mut);display:flex;align-items:center;gap:6px}
-.ccard .langs2 .dot{width:8px;height:8px;border-radius:50%}
-.ccard .body{padding:20px 22px 22px;flex:1;display:flex;flex-direction:column}
-.ccard h3{font-family:var(--serif);font-size:1.2rem;font-weight:500;margin-bottom:8px}
-.ccard p{color:var(--mut);font-size:.91rem;font-weight:300;flex:1}
-.ccard .stack{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 16px}
-.ccard .stack span{font-size:.71rem;color:var(--mut);padding:4px 9px;border-radius:6px;border:1px solid var(--line)}
-.ccard .links{display:flex;gap:9px}
-.ccard .links a{flex:1;text-align:center;font-size:.83rem;font-weight:600;padding:10px;border-radius:9999px;transition:.22s}
-.ccard .links .src{border:1px solid var(--line);background:#141414}
-.ccard .links .src:hover{background:#1f1f1f;border-color:rgba(255,255,255,.25)}
-.ccard .links .live{background:#fff;color:#000}
-.ccard .links .live:hover{background:#e4e4e7}
-.gh-all{display:inline-flex;align-items:center;gap:9px;margin-top:30px;font-family:var(--mono);font-size:.88rem;
-  border:1px solid var(--line);padding:12px 20px;border-radius:8px;background:var(--panel);transition:.25s}
-.gh-all:hover{border-color:var(--accent);color:var(--accent)}
+/* ---- avatar lane ----------------------------------------------------------
+   The twin is rendered on a fixed, full-bleed canvas behind the page, and the
+   scroll choreography parks it near one edge per section. Before this, every
+   section still ran the full 1120px and the figure simply landed on top of the
+   text — worst on the two-column project grid, where it sat squarely over the
+   right-hand column. A lane section gives up that half of the measure instead:
+   the copy narrows and pulls to the opposite side, so the empty half is
+   deliberate space the twin stands in rather than a collision. */
+.lane{max-width:1120px}
+.lane > *{max-width:min(660px,60%)}
+.lane-left > *{margin-right:auto}      /* copy left, twin stands right */
+.lane-right > *{margin-left:auto}      /* copy right, twin stands left */
+
+/* systems */
+.sys-now{display:grid;grid-template-columns:150px 1fr;gap:26px;margin-top:44px;padding:24px;
+  border:1px solid var(--line);border-radius:16px;background:var(--panel)}
+.sys-now-k{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--soft);display:flex;align-items:flex-start;gap:9px;padding-top:4px}
+.sys-now-k .pulse{width:7px;height:7px;border-radius:50%;background:#fff;flex:0 0 auto;margin-top:4px;
+  box-shadow:0 0 0 0 rgba(255,255,255,.55);animation:ringPulse 2.4s ease-out infinite}
+@keyframes ringPulse{70%{box-shadow:0 0 0 9px rgba(255,255,255,0)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
+.sys-now-b h3{font-family:var(--serif);font-size:1.3rem;font-weight:500;margin-bottom:9px}
+.sys-now-b p{color:var(--mut);font-size:.93rem;font-weight:300}
+
+.sys-list{margin-top:14px;display:flex;flex-direction:column}
+.sys{display:grid;grid-template-columns:150px 1fr;gap:26px;padding:38px 0;border-top:1px solid var(--line)}
+.sys-i{display:flex;flex-direction:column;gap:10px}
+.sys-n{font-family:var(--mono);font-size:1.6rem;font-weight:300;color:var(--soft);line-height:1}
+.sys-state{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.sys-b h3{font-family:var(--serif);font-size:clamp(1.3rem,2.4vw,1.72rem);font-weight:500;
+  line-height:1.2;letter-spacing:-.2px;margin-bottom:10px}
+.sys-sub{font-family:var(--mono);font-size:.76rem;color:var(--mut);margin-bottom:18px;line-height:1.6}
+.sys-b p{color:var(--soft);font-size:.95rem;font-weight:300}
+.sys-b code{font-family:var(--mono);font-size:.86em;color:var(--ink);
+  background:rgba(255,255,255,.07);padding:1px 6px;border-radius:4px}
+/* the constraint each system ran into. This is the part of the write-up that is
+   actually load-bearing — anyone can list a stack — so it is pulled out of the
+   paragraph flow and given a rule of its own rather than left as a closing aside. */
+.sys-limit{margin-top:18px;padding-left:18px;border-left:2px solid rgba(255,255,255,.3);
+  color:var(--mut)!important;font-size:.9rem!important}
+.sys-limit .k{font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink);display:block;margin-bottom:5px}
+.sys-b .stack,.sys-now-b .stack{display:flex;flex-wrap:wrap;gap:6px;margin-top:20px}
+.sys-b .stack span,.sys-now-b .stack span{font-size:.71rem;color:var(--mut);padding:4px 9px;border-radius:6px;border:1px solid var(--line)}
+
+.sys-more{margin-top:14px;padding-top:34px;border-top:1px solid var(--line)}
+.sys-more-h{font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--mut);margin-bottom:20px}
+.sys-more ul{list-style:none;display:flex;flex-direction:column;gap:16px}
+.sys-more li{color:var(--mut);font-size:.9rem;font-weight:300;line-height:1.65}
+.sys-more li b{color:var(--ink);font-weight:600}
+.sys-more li span{font-family:var(--mono);font-size:.71rem;color:var(--soft);
+  display:block;margin-top:5px;letter-spacing:.03em}
+.sys-more li a{color:var(--ink);border-bottom:1px solid var(--line)}
+.sys-more li a:hover{border-color:var(--accent)}
+.sys-note{margin-top:28px;font-size:.84rem;color:var(--mut);font-weight:300;font-style:italic}
 
 /* research */
 .pub-list{margin-top:46px;display:flex;flex-direction:column;gap:14px}
@@ -267,14 +298,24 @@ footer .f3d{opacity:.6;font-style:italic}
 /* 3D hologram canvas — fixed behind content, avatar walks with scroll */
 #scene3d{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;display:block}
 .hero-right{position:relative;min-height:440px;display:flex;justify-content:center;align-items:center}
-.avatar-hud{display:none;position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
-  font-family:var(--mono);font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--mut);white-space:nowrap}
+ /* The caption here used to read "digital twin - it walks as you scroll", which is a claim
+    the visitor has to take on trust. These are the figure's real numbers instead, read off
+    the loaded GLB, with the representation mix updated from the same smoothed weights that
+    drive the shader - so the panel is evidence of the pipeline rather than a label on it.
+    Fixed rather than parked in the hero, because the state it reports keeps changing. */
+.avatar-hud{display:none;position:fixed;right:22px;bottom:20px;z-index:40;align-items:center;
+  border:1px solid var(--line);border-radius:9px;padding:9px 15px;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(10px);
+  font-family:var(--mono);font-size:.63rem;letter-spacing:.11em;text-transform:uppercase;color:var(--mut);white-space:nowrap}
+.avatar-hud b{color:var(--soft);font-weight:500;letter-spacing:.17em}
+.avatar-hud i{font-style:normal;color:#52525b;margin:0 7px 0 16px}
+.avatar-hud u{text-decoration:none;color:var(--ink);font-variant-numeric:tabular-nums}
 .avatar-hud .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#fff;
   margin-right:9px;box-shadow:0 0 10px rgba(255,255,255,.8);animation:pulse 2.2s infinite}
 @keyframes pulse{50%{opacity:.25}}
 .orbit-stage{transition:opacity .8s ease}
 .has3d .orbit-stage{opacity:0;visibility:hidden;transition:opacity .8s ease,visibility 0s .8s}
-.has3d .avatar-hud{display:block}
+.has3d .avatar-hud{display:flex}
 
 /* hero title letter cascade */
 .ltr{display:inline-block;opacity:0;transform:translateY(.6em) rotate(5deg);animation:ltr .7s cubic-bezier(.2,.7,.2,1) forwards}
@@ -312,7 +353,7 @@ footer .f3d{opacity:.6;font-style:italic}
   transition:width .25s,height .25s,background .25s,opacity .4s;mix-blend-mode:screen}
 #cursor.hot{width:48px;height:48px;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.9)}
 @media(hover:none){#cursor{display:none}}
-.proj,.ccard,.cert,.scard{will-change:transform}
+.proj,.sys,.cert,.scard{will-change:transform}
 
 /* WebKit charges far more for a large blur than Blink does, and every blur on this page sits
    on a fixed or continuously animating element — so iOS re-rasterises them on each scroll
@@ -328,10 +369,10 @@ footer .f3d{opacity:.6;font-style:italic}
   .screen3d{animation:none;will-change:auto}
   nav.scrolled{background:#000;backdrop-filter:none}
   .proj .tagpill{backdrop-filter:none;background:rgba(0,0,0,.88)}
-  .avatar-hud{backdrop-filter:none;background:rgba(0,0,0,.85)}
+  .has3d .avatar-hud{display:none}   /* no room beside the figure on a phone */
 }
 @media(hover:none){
-  .proj,.ccard,.cert,.scard{will-change:auto}
+  .proj,.sys,.cert,.scard{will-change:auto}
 }
 
 @media(max-width:900px){
@@ -346,6 +387,13 @@ footer .f3d{opacity:.6;font-style:italic}
   .about-body .facts{margin-top:0}
   .pub{grid-template-columns:54px 1fr;gap:14px}.pub .go{grid-column:2}
   .edu-row{grid-template-columns:1fr}
+  /* below the breakpoint the twin has nowhere to stand aside, so the lane stops
+     reserving space for it and the copy takes the full measure back. */
+  .lane > *{max-width:none;margin:0}
+  .sys,.sys-now{grid-template-columns:1fr;gap:14px}
+  .sys-i{flex-direction:row;align-items:baseline;gap:14px}
+  .sys-n{font-size:1.15rem}
+  .sys{padding:30px 0}
 }
 @media(max-width:560px){
   .wrap{padding:0 18px}
@@ -372,7 +420,7 @@ footer .f3d{opacity:.6;font-style:italic}
   <div class="brand">Ashkan Aghamoali</div>
   <div class="navlinks">
     <a href="#work">XR Work</a><a href="#about">About</a><a href="#research">Research</a>
-    <a href="#code">Code</a><a href="#experience">Experience</a><a href="#certifications">Certificates</a>
+    <a href="#systems">Systems</a><a href="#experience">Experience</a><a href="#certifications">Certificates</a>
   </div>
   <a class="nav-cta" href="#contact">Contact</a>
 </div></nav>
@@ -395,7 +443,7 @@ footer .f3d{opacity:.6;font-style:italic}
     <div class="orbit-stage">
       <div class="twin-stand" id="heroPortrait" aria-hidden="true"><span class="beam"></span><span class="disc"></span></div>
     </div>
-    <div class="avatar-hud" aria-hidden="true"><span class="dot"></span>Digital twin · it walks as you scroll</div>
+    <div class="avatar-hud" aria-hidden="true"><span class="dot"></span><b>Digital twin</b><i>mesh</i><u id="hudTri">—</u><i>rig</i><u id="hudRig">—</u><i>repr</i><u id="hudRepr">loading</u></div>
   </div>
 </div></div>
 <div class="scroll-hint"><span>Scroll</span><span class="bar"></span></div>
@@ -455,7 +503,7 @@ footer .f3d{opacity:.6;font-style:italic}
 </div></section>
 
 <!-- RESEARCH -->
-<section id="research"><div class="wrap reveal">
+<section id="research"><div class="wrap lane lane-right reveal">
   <div class="sec-head">
     <div class="sec-eyebrow"><b>03</b> — Research</div>
     <h2 class="sec-title">Publications</h2>
@@ -492,100 +540,74 @@ footer .f3d{opacity:.6;font-style:italic}
   </div>
 </div></section>
 
-<!-- CODE -->
-<section id="code"><div class="wrap reveal">
+<!-- SYSTEMS -->
+<section id="systems"><div class="wrap lane lane-left reveal">
   <div class="sec-head">
-    <div class="sec-eyebrow"><b>04</b> — Open Source</div>
-    <h2 class="sec-title">Selected code projects</h2>
-    <p class="sec-intro">Open-source work spanning robotics &amp; machine learning, augmented reality, computer vision and web development.</p>
+    <div class="sec-eyebrow"><b>04</b> — Systems</div>
+    <h2 class="sec-title">Engineering decisions</h2>
+    <p class="sec-intro">Three simulation-first systems built end to end. Each one is described by the decision that shaped it and the limit I could not design around — in practice those were the parts that took the longest to get right.</p>
   </div>
-  <div class="code-grid">
-    <div class="ccard">
-      <div class="top"><div class="repo">iamashkan / Real-Time-Digital-Twin-Generation-on-IOS</div>
-        <div class="langbar"><i style="width:57.2%;background:#e4e4e7"></i><i style="width:36.4%;background:#a1a1aa"></i><i style="width:3.8%;background:#71717a"></i><i style="width:2.6%;background:#52525b"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>Swift</span><span><span class="dot" style="background:#a1a1aa"></span>JavaScript</span><span><span class="dot" style="background:#71717a"></span>HTML</span><span><span class="dot" style="background:#52525b"></span>CSS</span></div></div>
-      <div class="body"><h3>Real-Time Digital Twin Generation on iOS <span class="badge ms" style="display:inline-block;font-family:var(--mono);font-size:.6rem;font-style:normal;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:5px;margin-left:6px;color:#a1a1aa;border:1px solid rgba(255,255,255,.22);vertical-align:middle">Under development</span></h3>
-        <p>An iOS-first platform that turns an iPhone into an industrial scanning tool. It captures room geometry live with ARKit + RoomPlan, detects and labels equipment on-device with Core ML / Vision, reads nameplates with OCR (fusing labels such as <code>Pump P-101</code>), and visualises scan coverage in real time. Scans export as JSON plus glTF/GLB models, sync to a Node.js + PostgreSQL backend, and are inspectable from a browser dashboard — while an edge gateway binds each scanned asset to real devices over MQTT and other industrial protocols with auditable, confirmation-gated control. Measured data is kept strictly separate from AI-inferred data throughout. Built milestone-by-milestone, each one independently runnable and verifiable.</p>
-        <div class="stack"><span>Swift</span><span>ARKit</span><span>RoomPlan</span><span>Core ML</span><span>Vision</span><span>RealityKit</span><span>Node.js</span><span>PostgreSQL</span><span>MQTT</span><span>Digital Twin</span></div>
-        <div class="links"><a class="src" href="https://github.com/iamashkan/Real-Time-Digital-Twin-Generation-on-IOS" target="_blank" rel="noopener">View source ↗</a></div></div>
-    </div>
-    <div class="ccard">
-      <div class="top"><div class="repo">iamashkan / UR5e-Circular-Motor-Recovery</div>
-        <div class="langbar"><i style="width:64%;background:#e4e4e7"></i><i style="width:30%;background:#a1a1aa"></i><i style="width:6%;background:#52525b"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>Python</span><span><span class="dot" style="background:#a1a1aa"></span>C#</span><span><span class="dot" style="background:#52525b"></span>Dockerfile</span></div></div>
-      <div class="body"><h3>UR5e Circular Motor Recovery</h3>
-        <p>A simulation-based, hardware-ready digital twin for robotic recovery (Re-X) of end-of-life electric motors from Dubai's district-cooling infrastructure. A UR5e cobot with a Robotiq 2F-85 gripper sorts eleven separable motor components across reuse / repair / replace / recycle stations in Gazebo; a Python decision engine scores each part's health and risk from a Digital Product Passport and sensor stream, MoveIt 2 plans the 17-step pick-and-place workflow through ros2_control, and a Streamlit dashboard plus a Unity visual twin track every decision. Today end-of-life motors are mostly shredded with their copper recovered by eddy-current separation, so the real question is the motor size above which a robotic cell beats shredding — which is why the cell is modelled per component rather than per motor. The motion planning, workcell and decision engine are real; perception is currently mocked.</p>
-        <div class="stack"><span>ROS 2 Jazzy</span><span>Gazebo</span><span>MoveIt 2</span><span>UR5e</span><span>Python</span><span>Unity</span><span>C#</span><span>Streamlit</span><span>Digital Twin</span></div>
-        <div class="links"><a class="src" href="https://github.com/iamashkan/UR5e-Circular-Motor-Recovery" target="_blank" rel="noopener">View source ↗</a></div></div>
-    </div>
-    <div class="ccard">
-      <div class="top"><div class="repo">iamashkan / Battery-Sorting-in-Digital-Twin</div>
-        <div class="langbar"><i style="width:47.6%;background:#e4e4e7"></i><i style="width:45.6%;background:#a1a1aa"></i><i style="width:6.8%;background:#71717a"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>Python</span><span><span class="dot" style="background:#a1a1aa"></span>C#</span><span><span class="dot" style="background:#71717a"></span>HTML</span></div></div>
-      <div class="body"><h3>Battery Sorting in Digital Twin</h3>
-        <p>An operational digital twin for end-of-life lithium-ion battery recovery and robotic sorting, built against the EU Battery Regulation — which makes a digital battery passport mandatory for EV, industrial and light-transport batteries from 18 February 2027. A Unity control twin streams each battery's image to a FastAPI backend that classifies the cell form factor, draws a state-of-health profile from NASA PCoE aging data and scores risk; a decision engine routes every battery to reuse / remanufacture / recycle / quarantine under selectable policy modes, an ABB CRB-style cobot sorts it on the line, and a Streamlit dashboard tracks KPIs and digital product passports. Built on a real RecyBat24 image subset and NASA PCoE battery-aging data. Simulation-only, and deliberately scoped: identifying cell <em>chemistry</em> (LFP vs NMC) requires XRF or spectroscopy in a real plant and is not something an RGB image can do.</p>
-        <div class="stack"><span>Unity</span><span>C#</span><span>FastAPI</span><span>Python</span><span>scikit-learn</span><span>Computer Vision</span><span>Streamlit</span><span>Digital Twin</span></div>
-        <div class="links"><a class="src" href="https://github.com/iamashkan/Battery-Sorting-in-Digital-Twin" target="_blank" rel="noopener">View source ↗</a></div></div>
-    </div>
-    <div class="ccard">
-      <div class="top"><div class="repo">iamashkan / Smart-Highway-Lighting</div>
-        <div class="langbar"><i style="width:34.3%;background:#a1a1aa"></i><i style="width:30.2%;background:#e4e4e7"></i><i style="width:23.5%;background:#71717a"></i><i style="width:4.3%;background:#3f3f46"></i><i style="width:7.7%;background:#52525b"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>Python</span><span><span class="dot" style="background:#a1a1aa"></span>C#</span><span><span class="dot" style="background:#71717a"></span>ShaderLab</span><span><span class="dot" style="background:#3f3f46"></span>C++</span></div></div>
-      <div class="body"><h3>Smart Highway Lighting</h3>
-        <p>An emergency-aware adaptive lighting system for a 6-lane smart motorway, built simulation-first across the full edge-to-cloud stack. The emergency case is the thesis: when an ambulance, police or fire vehicle is detected, the system raises a 100% safety corridor ahead of it, in that direction only. Outside emergencies a Python control backend holds the road at a configurable eco level and brightens just the luminaires ahead of each vehicle, while modelling energy use, CO₂, luminaire health, remaining useful life and Re-X lifecycle decisions with digital product passports. Telemetry streams over MQTT to a Streamlit operations dashboard, a five-node STM32 edge-controller network (RS485 / CAN) simulated in Wokwi, and a Unity 6 night-highway digital twin. Energy savings are measured against an always-on baseline — worth noting that many highway authorities now switch motorway lighting off entirely between midnight and 05:30, a baseline this system does not beat on energy alone.</p>
-        <div class="stack"><span>Python</span><span>STM32</span><span>Embedded C++</span><span>MQTT</span><span>Wokwi</span><span>RS485 / CAN</span><span>Unity 6</span><span>C#</span><span>Streamlit</span><span>Digital Twin</span></div>
-        <div class="links"><a class="src" href="https://github.com/iamashkan/Smart-Highway-Lighting" target="_blank" rel="noopener">View source ↗</a></div></div>
-    </div>
-    <div class="ccard">
-      <div class="top"><div class="repo">iamashkan / defect-inspection-digital-twin</div>
-        <div class="langbar"><i style="width:95.1%;background:#e4e4e7"></i><i style="width:2.9%;background:#a1a1aa"></i><i style="width:1.5%;background:#52525b"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>Python</span><span><span class="dot" style="background:#a1a1aa"></span>Jupyter</span><span><span class="dot" style="background:#52525b"></span>Dockerfile</span></div></div>
-      <div class="body"><h3>Defect Inspection Digital Twin</h3>
-        <p>A simulation-only inspection pipeline for circular manufacturing. A PyTorch model detects surface defects and localizes them with Grad-CAM, an ML grader sorts each part into reuse / repair / recycle with a confidence score, and a digital twin keeps a live record per part — all wired into a ROS 2 (Humble) node graph with a Gazebo inspection cell and RViz, plus a Streamlit dashboard.</p>
-        <div class="stack"><span>PyTorch</span><span>OpenCV</span><span>Grad-CAM</span><span>ROS 2</span><span>Gazebo</span><span>Streamlit</span><span>Digital Twin</span></div>
-        <div class="links"><a class="src" href="https://github.com/iamashkan/defect-inspection-digital-twin" target="_blank" rel="noopener">View source ↗</a></div></div>
-    </div>
-    <div class="ccard">
-      <div class="top"><div class="repo">iamashkan / CurrencyRateTelegramBot</div>
-        <div class="langbar"><i style="width:100%;background:#e4e4e7"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>JavaScript</span></div></div>
-      <div class="body"><h3>Market Price Bot</h3>
-        <p>A serverless Telegram bot on Cloudflare Workers that posts live foreign-exchange, gold and tether prices to a channel every 15 minutes with a clean Persian (RTL) layout. Each price is tracked against the 23:00 baseline held in Cloudflare KV, a cron trigger drives the schedule, and a nightly summary stores the next day's baseline — and if the data source fails it skips the cycle and alerts the admin rather than posting anything broken.</p>
-        <div class="stack"><span>JavaScript</span><span>Cloudflare Workers</span><span>Cloudflare KV</span><span>Telegram Bot API</span><span>Cron Triggers</span></div>
-        <div class="links"><a class="src" href="https://github.com/iamashkan/CurrencyRateTelegramBot" target="_blank" rel="noopener">View source ↗</a></div></div>
-    </div><div class="ccard">
-      <div class="top"><div class="repo">iamashkan / Semantic-Segmentation-AR</div>
-        <div class="langbar"><i style="width:68.5%;background:#e4e4e7"></i><i style="width:13.9%;background:#71717a"></i><i style="width:11.2%;background:#52525b"></i><i style="width:6.4%;background:#a1a1aa"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>ShaderLab</span><span><span class="dot" style="background:#71717a"></span>HLSL</span><span><span class="dot" style="background:#a1a1aa"></span>C#</span></div></div>
-      <div class="body"><h3>Semantic Segmentation in AR</h3>
-        <p>A real-time, environment-aware AR experience using Niantic Lightship ARDK and Unity. Classifies real-world surfaces — sky, ground, trees, buildings — from the camera feed and drives AR behaviour with custom shaders. Built in 2024 on Lightship ARDK 3.x, which Niantic has since retired — lightship.dev was decommissioned in February 2026 and the platform moved to Niantic Spatial NSDK 4.0.</p>
-        <div class="stack"><span>Unity3D</span><span>Lightship ARDK</span><span>Shader Graph</span><span>Computer Vision</span></div>
-        <div class="links"><a class="src" href="https://github.com/iamashkan/Semantic-Segmentation-using-Unity-and-Niantic-Lightship" target="_blank" rel="noopener">View source ↗</a></div></div>
-    </div>
-    <div class="ccard">
-      <div class="top"><div class="repo">iamashkan / WebAR-FaceFilter</div>
-        <div class="langbar"><i style="width:55.7%;background:#a1a1aa"></i><i style="width:23.8%;background:#e4e4e7"></i><i style="width:20.5%;background:#71717a"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>C#</span><span><span class="dot" style="background:#71717a"></span>HTML</span><span><span class="dot" style="background:#a1a1aa"></span>Needle</span></div></div>
-      <div class="body"><h3>WebAR Face Filter</h3>
-        <p>A browser-based AR face filter built with Unity and the Needle Engine — real-time face detection and tracking with customizable effects, running cross-platform with no app installation.</p>
-        <div class="stack"><span>Unity</span><span>Needle Engine</span><span>WebAR</span><span>Face Tracking</span></div>
-        <div class="links"><a class="src" href="https://github.com/iamashkan/WebAR-FaceFilter" target="_blank" rel="noopener">Source</a><a class="live" href="https://webar-facefilter-z1ejzsyz152zin.needle.run/" target="_blank" rel="noopener">Live demo ↗</a></div></div>
-    </div>
-    <div class="ccard">
-      <div class="top"><div class="repo">iamashkan / crypto-watchlist</div>
-        <div class="langbar"><i style="width:51.5%;background:#e4e4e7"></i><i style="width:40%;background:#71717a"></i><i style="width:8.5%;background:#a1a1aa"></i></div>
-        <div class="langs2"><span><span class="dot" style="background:#e4e4e7"></span>TypeScript</span><span><span class="dot" style="background:#71717a"></span>CSS</span><span><span class="dot" style="background:#a1a1aa"></span>HTML</span></div></div>
-      <div class="body"><h3>Crypto Watchlist</h3>
-        <p>A responsive React + TypeScript application for tracking cryptocurrency markets, demonstrating modern front-end development and live API integration.</p>
-        <div class="stack"><span>React</span><span>TypeScript</span><span>CSS</span></div>
-        <div class="links"><a class="src" href="https://github.com/iamashkan/crypto-watchlist" target="_blank" rel="noopener">View source ↗</a></div></div>
+
+  <div class="sys-now">
+    <div class="sys-now-k"><span class="pulse"></span>Currently building</div>
+    <div class="sys-now-b">
+      <h3>Real-time digital twin generation on iOS</h3>
+      <p>Turning an iPhone into an industrial scanning tool: room geometry captured live with ARKit&nbsp;+&nbsp;RoomPlan, equipment detected and labelled on-device with Core&nbsp;ML&nbsp;/&nbsp;Vision, nameplates read by OCR, and each scanned asset bound to a real device through an edge gateway over MQTT. Measured data stays strictly separate from AI-inferred data throughout — a twin that quietly mixes the two is worse than no twin at all.</p>
+      <div class="stack"><span>Swift</span><span>ARKit</span><span>RoomPlan</span><span>Core ML</span><span>RealityKit</span><span>Node.js</span><span>MQTT</span></div>
     </div>
   </div>
-  <a class="gh-all" href="https://github.com/iamashkan" target="_blank" rel="noopener">View all repositories on GitHub →</a>
+
+  <div class="sys-list">
+
+    <article class="sys">
+      <div class="sys-i"><div class="sys-n">01</div><div class="sys-state">Simulation · hardware-ready</div></div>
+      <div class="sys-b">
+        <h3>Sizing a robot cell against a shredder</h3>
+        <div class="sys-sub">Circular recovery of end-of-life electric motors · UR5e · ROS 2 Jazzy · MoveIt 2 · Gazebo</div>
+        <p>End-of-life motors today are mostly shredded, with their copper recovered by eddy-current separation. So the useful question was never whether a cobot <em>can</em> take a motor apart — it is the motor size above which doing so beats shredding. That framing decided the architecture: the cell is modelled per separable component rather than per motor, so the crossover can be read straight off the results. A UR5e with a Robotiq 2F-85 gripper sorts eleven components across reuse / repair / replace / recycle stations, MoveIt 2 plans the 17-step pick-and-place workflow through <code>ros2_control</code>, and a Python decision engine scores each part's health and risk from a Digital Product Passport and sensor stream.</p>
+        <p class="sys-limit"><span class="k">Limit</span> Perception is mocked. The motion planning, workcell and decision engine are real; what a camera actually sees on a corroded motor is not something I could simulate honestly, so I did not pretend to.</p>
+        <div class="stack"><span>ROS 2 Jazzy</span><span>MoveIt 2</span><span>Gazebo</span><span>UR5e</span><span>Python</span><span>Unity</span><span>Streamlit</span></div>
+      </div>
+    </article>
+
+    <article class="sys">
+      <div class="sys-i"><div class="sys-n">02</div><div class="sys-state">Simulation · real datasets</div></div>
+      <div class="sys-b">
+        <h3>What an RGB camera cannot tell you about a battery</h3>
+        <div class="sys-sub">End-of-life lithium-ion recovery and robotic sorting · Unity · FastAPI · scikit-learn</div>
+        <p>The EU Battery Regulation makes a digital battery passport mandatory for EV, industrial and light-transport batteries from 18 February 2027, which fixes the data model the whole system has to emit — so the passport was built first and the sorting line second, not the other way round. A Unity control twin streams each cell's image to a FastAPI backend that classifies form factor, draws a state-of-health profile from NASA PCoE aging data and scores risk; a decision engine then routes every battery to reuse / remanufacture / recycle / quarantine under selectable policy modes, with an ABB CRB-style cobot sorting it on the line. Built on a real RecyBat24 image subset rather than synthetic data.</p>
+        <p class="sys-limit"><span class="k">Limit</span> Cell chemistry — LFP against NMC — cannot be read off an RGB image; a real plant needs XRF or spectroscopy. The classifier is therefore scoped to form factor, and chemistry is carried by the passport instead of being inferred.</p>
+        <div class="stack"><span>Unity</span><span>C#</span><span>FastAPI</span><span>Python</span><span>scikit-learn</span><span>Computer Vision</span><span>Streamlit</span></div>
+      </div>
+    </article>
+
+    <article class="sys">
+      <div class="sys-i"><div class="sys-n">03</div><div class="sys-state">Simulation · edge-to-cloud</div></div>
+      <div class="sys-b">
+        <h3>Designing against a baseline that wins on energy</h3>
+        <div class="sys-sub">Emergency-aware adaptive lighting for a 6-lane smart motorway · STM32 · MQTT · Unity 6</div>
+        <p>The emergency case is the thesis. When an ambulance, police or fire vehicle is detected, the system raises a 100% safety corridor ahead of it — in that direction only. Outside emergencies the road holds a configurable eco level and brightens just the luminaires ahead of each vehicle, while modelling energy, CO₂, luminaire health, remaining useful life and Re-X lifecycle decisions. It is built across the full stack rather than as a controller in isolation: telemetry over MQTT into a Streamlit operations dashboard, a five-node STM32 edge-controller network on RS485 / CAN simulated in Wokwi, and a Unity 6 night-highway twin.</p>
+        <p class="sys-limit"><span class="k">Limit</span> Many highway authorities now switch motorway lighting off entirely between midnight and 05:30. Against that baseline this system loses on energy outright — which is why it is argued on emergency response and luminaire lifecycle, and not on kilowatt-hours saved.</p>
+        <div class="stack"><span>Python</span><span>STM32</span><span>Embedded C++</span><span>MQTT</span><span>RS485 / CAN</span><span>Wokwi</span><span>Unity 6</span><span>Streamlit</span></div>
+      </div>
+    </article>
+
+  </div>
+
+  <div class="sys-more">
+    <div class="sys-more-h">Also built</div>
+    <ul>
+      <li><b>Defect Inspection Digital Twin</b> — PyTorch surface-defect detection with Grad-CAM localisation, feeding an ML grader and a per-part twin record across a ROS 2 node graph. <span>PyTorch · ROS 2 · Gazebo</span></li>
+      <li><b>Semantic Segmentation in AR</b> — real-time surface classification from the camera feed driving AR behaviour through custom shaders. Built on Lightship ARDK 3.x, which Niantic has since retired. <span>Unity · Lightship ARDK · Shader Graph</span></li>
+      <li><b>WebAR Face Filter</b> — browser-based face tracking with no app install, running cross-platform. <a href="https://webar-facefilter-z1ejzsyz152zin.needle.run/" target="_blank" rel="noopener">Live demo ↗</a> <span>Unity · Needle Engine</span></li>
+      <li><b>Market Price Bot</b> — serverless Telegram bot on Cloudflare Workers posting FX, gold and tether prices against a nightly KV baseline; skips the cycle and alerts rather than posting bad data. <span>Cloudflare Workers · KV · Cron</span></li>
+    </ul>
+    <p class="sys-note">Source for these systems is kept in private repositories. Happy to walk through any of them, or share a repository on request.</p>
+  </div>
 </div></section>
 
 <!-- EXPERIENCE -->
-<section id="experience"><div class="wrap reveal">
+<section id="experience"><div class="wrap lane lane-right reveal">
   <div class="sec-head">
     <div class="sec-eyebrow"><b>05</b> — Experience</div>
     <h2 class="sec-title">Experience &amp; education</h2>
@@ -707,7 +729,7 @@ addEventListener('scroll',()=>{
   });
 },{passive:true});
 /* reveal on enter — height-independent trigger: a % threshold can never fire for a section
-   taller than viewport/threshold (a tall #code maxes out ~0.15 ratio), leaving it stuck hidden.
+   taller than viewport/threshold (a tall #systems maxes out ~0.15 ratio), leaving it stuck hidden.
    threshold:0 + a bottom rootMargin reveals each section once its top scrolls a fixed slice in. */
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:0,rootMargin:'0px 0px -12% 0px'});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
@@ -771,7 +793,7 @@ if(fine&&!reduceMotion){
   addEventListener('mousemove',e=>{mxp=e.clientX;myp=e.clientY;cur.style.opacity=1});
   document.addEventListener('mouseover',e=>cur.classList.toggle('hot',!!e.target.closest('a,button')));
   (function cf(){cx+=(mxp-cx)*.2;cy+=(myp-cy)*.2;cur.style.left=cx+'px';cur.style.top=cy+'px';requestAnimationFrame(cf)})();
-  document.querySelectorAll('.proj,.ccard,.cert,.scard').forEach(c=>{
+  document.querySelectorAll('.proj,.sys,.cert,.scard').forEach(c=>{
     c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();
       const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
       c.style.transform=`perspective(900px) rotateX(${(-y*6).toFixed(2)}deg) rotateY(${(x*7).toFixed(2)}deg) translateY(-5px)`});
@@ -948,6 +970,13 @@ function adopt(gltf,role){
   /* measure local height so the scan line can travel feet→head regardless of scroll scale */
   const bb=new THREE.Box3().setFromObject(m);mYMin=bb.min.y;mYH=Math.max(.001,bb.max.y-bb.min.y);
   G.add(m);model=m;
+  /* real figures for the HUD, counted off the shells gathered above rather than guessed:
+     index count where the geometry is indexed, position count where it is not. */
+  let tri=0;const bones=new Set();
+  shells.forEach(o=>{const g=o.geometry;if(!g)return;
+    tri+=Math.floor((g.index?g.index.count:(g.attributes.position?.count||0))/3);
+    if(o.isSkinnedMesh&&o.skeleton)o.skeleton.bones.forEach(b=>bones.add(b));});
+  hud.tri=tri;hud.rig=bones.size;
 }
 function mannequin(){ /* offline fallback: capsule humanoid, no skeleton, no height mask */
   const bodyP=bodyMat.clone(),wireP=wireMat.clone();
@@ -996,22 +1025,43 @@ loadAvatar(0);
    real: fraction of body kept as real skin (1=all real → 0=all hologram)
    blue: blueprint recolor · diss: disintegration/point-cloud · anim: motion role */
 const WP={
-  header:       {fx:.5, s:1.12,dim:1,  real:1,   blue:0,  diss:0,  anim:'idle'},  // real you
-  work:         {fx:-.88,s:.94,dim:.5,  real:.5,  blue:0,  diss:.12,anim:'smoke'}, // XR → digitizing
-  about:        {fx:.88, s:.9, dim:.45, real:.08, blue:0,  diss:0,  anim:'idle'},  // wireframe twin
-  research:     {fx:-.9, s:.88,dim:.4,  real:0,   blue:0,  diss:.35,anim:'idle'},  // dispersing
-  code:         {fx:.9,  s:.88,dim:.4,  real:0,   blue:1,  diss:0,  anim:'idle'},  // CAD blueprint
-  experience:   {fx:-.88,s:.92,dim:.5,  real:0,   blue:.35,diss:0,  anim:'smoke'},
-  certifications:{fx:.9, s:.9, dim:.4,  real:0,   blue:0,  diss:.18,anim:'idle'},
-  contact:      {fx:-.42,s:1.08,dim:.85,real:0,   blue:0,  diss:.45,anim:'smoke'}}; // full hologram
+  /* dim is the lever that decides whether the twin is a subject or a backdrop. Sections
+     whose content is a full-width grid (the XR reel, the certificates) have no gutter to
+     spare, so the figure is pushed past the edge and dropped to ambient there; the three
+     lane sections narrow their copy instead and keep it lit beside the text. */
+  header:        {fx:.5,   s:1.12,dim:1,   real:.82,blue:0,  diss:.08,anim:'idle'},  // you, with the scan edge already at the hairline
+  work:          {fx:-1.05,s:.94, dim:.2,  real:.3, blue:0,  diss:.24,anim:'smoke'}, // ambient behind the reel
+  about:         {fx:1.06, s:.9,  dim:.18, real:.08,blue:0,  diss:0,  anim:'idle'},  // ambient; the portrait carries this one
+  research:      {fx:-.62, s:.9,  dim:.5,  real:0,  blue:0,  diss:.32,anim:'idle'},  // lane — dispersing
+  systems:       {fx:.62,  s:.92, dim:.55, real:0,  blue:1,  diss:0,  anim:'idle'},  // lane — CAD blueprint
+  experience:    {fx:-.62, s:.92, dim:.5,  real:0,  blue:.35,diss:0,  anim:'smoke'}, // lane
+  certifications:{fx:1.06, s:.9,  dim:.18, real:0,  blue:0,  diss:.2, anim:'idle'},  // ambient behind the grid
+  contact:       {fx:0,    s:1.06,dim:.6,  real:0,  blue:0,  diss:.55,anim:'smoke'}};// full hologram, behind centred copy
 const track=[];
 function buildTrack(){
   track.length=0;
+  /* The last section's centre sits below the furthest the page can actually scroll, so its
+     waypoint was unreachable and the twin never arrived at its final state — it stalled
+     part-way through the walk from the one before. Clamp every waypoint into the range the
+     visitor can actually reach. */
+  const maxY=Math.max(0,document.body.scrollHeight-innerHeight);
   document.querySelectorAll('header,section').forEach(el=>{
     const key=el.tagName==='HEADER'?'header':el.id,cfg=WP[key];if(!cfg)return;
-    track.push({y:Math.max(0,el.offsetTop+el.offsetHeight*.5-innerHeight*.5),...cfg});
+    track.push({y:Math.min(maxY,Math.max(0,el.offsetTop+el.offsetHeight*.5-innerHeight*.5)),...cfg});
   });
   track.sort((p,q)=>p.y-q.y);
+}
+/* Those offsets are read off the laid-out page, but the XR reel loads its posters and videos
+   lazily and only then takes its real height. Measuring once on load therefore left every
+   waypoint below it pointing at the wrong scroll position for the rest of the session — the
+   twin drifted a whole section out of step. Re-measure whenever the document height moves. */
+if(window.ResizeObserver){
+  let lastH=0,rq=0;
+  new ResizeObserver(()=>{
+    const h=document.body.scrollHeight;
+    if(h===lastH)return;lastH=h;
+    cancelAnimationFrame(rq);rq=requestAnimationFrame(buildTrack);
+  }).observe(document.body);
 }
 function sample(sy){
   if(!track.length)return{x:0,s:1,dim:1,real:1,blue:0,diss:0,animA:'idle',animB:'idle',au:0};
@@ -1053,6 +1103,23 @@ addEventListener('pointermove',e=>{
 
 document.body.classList.add('has3d');
 
+/* HUD state. The DOM is only touched when a field actually changes — this runs inside the
+   render loop, and writing the same string 60 times a second is layout work for nothing. */
+const hud={tri:0,rig:0,el:{tri:document.getElementById('hudTri'),
+  rig:document.getElementById('hudRig'),repr:document.getElementById('hudRepr')},last:{}};
+function hudSet(k,v){if(hud.last[k]===v)return;hud.last[k]=v;const e=hud.el[k];if(e)e.textContent=v;}
+function hudTick(){
+  hudSet('tri',hud.tri?hud.tri.toLocaleString('en-US')+' tri':'—');
+  hudSet('rig',hud.rig?hud.rig+' joints':'—');
+  /* name the layer that currently dominates, then how far it has gone */
+  const pct=n=>Math.round(n*100)+'%';
+  hudSet('repr', !model ? 'loading'
+    : mDiss>.28 ? 'point cloud '+pct(mDiss)
+    : mBlue>.3  ? 'blueprint '+pct(mBlue)
+    : mReal>.55 ? 'surface '+pct(mReal)
+    : 'wireframe '+pct(1-mReal));
+}
+
 const clock=new THREE.Clock();
 let px=sample(scrollY).x,pscale=1,pdim=1,lastSy=scrollY,scrollV=0,appS=0,appA=0;
 let mReal=1,mBlue=0,mDiss=0;   /* smoothed per-section representation weights */
@@ -1065,7 +1132,16 @@ function frame(){
   const tgt=sample(sy),k=RM?1:Math.min(1,dt*3);
   const oldx=px;px+=(tgt.x-px)*k;G.position.x=px;
   pscale+=(tgt.s-pscale)*k;G.scale.setScalar(pscale);
-  pdim+=(tgt.dim-pdim)*k;
+  /* A waypoint parks the twin beside a lane, but getting from one to the next walks it
+     straight across the column of text in between, which is where it used to sit at half
+     brightness on top of the words. Brightness now follows how far out it actually is:
+     full at either margin, nearly background as it passes the middle. The hero is the one
+     place the figure may stand near the centre, because the right-hand column there is
+     empty by construction — and on a phone there is no lane to cross at all. */
+  const halfWv=Math.tan(cam.fov*Math.PI/360)*cam.position.z*cam.aspect;
+  const edge=Math.min(1,Math.abs(px)/(halfWv*.6));   /* 1 by the time it reaches its lane */
+  const cross=(sy<innerHeight*.55||innerWidth<861)?1:(.18+.82*edge*edge);
+  pdim+=(tgt.dim*cross-pdim)*k;
   /* per-section representation: scan line follows scroll (real→wireframe), blueprint + dissolve layer on top */
   mReal+=(tgt.real-mReal)*k;mBlue+=(tgt.blue-mBlue)*k;mDiss+=(tgt.diss-mDiss)*k;
   holoU.uTime.value=t;
@@ -1075,6 +1151,7 @@ function frame(){
   holoU.uBand.value=pscale*bandL;
   holoU.uLineY.value=G.position.y+pscale*((mYMin-marginL)+mReal*(mYH+2*marginL));
   holoU.uBlue.value=mBlue;holoU.uDiss.value=mDiss;
+  if((hud.t=(hud.t||0)+dt)>.12){hud.t=0;hudTick();}
   appS+=(1-appS)*Math.min(1,dt*1.6);
   appA+=((model?1:0)-appA)*Math.min(1,dt*1.8);
   fadeScene.forEach(f=>f.m.opacity=f.o*pdim*appS);
