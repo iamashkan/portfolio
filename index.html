@@ -1094,14 +1094,15 @@ function frame(){
       face=Math.sign(vx)*1.35;
     }else if(hasMouse){
       const halfW=Math.tan(cam.fov*Math.PI/360)*cam.position.z*cam.aspect;
-      /* the true geometric angle is small — the camera sits well back — so drive the turn off
-         how far the cursor is from the avatar as a fraction of the visible half-width. That
-         reads as actually looking at you instead of a polite nod. */
-      face=THREE.MathUtils.clamp((mx*halfW-px)/Math.max(halfW,.001)*.85,-1.35,1.35);
+      /* mostly where the cursor is across the window, nudged by where the avatar is standing.
+         A purely avatar-relative angle looked right on paper and wrong on screen: it stands
+         near the right edge, so the whole window is to its left and the right half of the
+         screen produced almost no turn at all. */
+      face=THREE.MathUtils.clamp(mx*1.25-(px/Math.max(halfW,.001))*.35,-1.35,1.35);
     }else{
       face=Math.sin(t*.4)*.25;
     }
-    model.rotation.y+=(face-model.rotation.y)*Math.min(1,dt*(hasMouse?5:3.5));
+    model.rotation.y+=(face-model.rotation.y)*Math.min(1,dt*(hasMouse?6:3.5));
   }
   if(!RM){
     grid.rotation.y=t*.12;
