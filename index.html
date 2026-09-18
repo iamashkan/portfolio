@@ -1036,7 +1036,12 @@ addEventListener('load',buildTrack);
 onResize();
 
 let mx=0,my=0;
-addEventListener('pointermove',e=>{mx=e.clientX/innerWidth*2-1;my=-(e.clientY/innerHeight*2-1)});
+let hasMouse=false;
+addEventListener('pointermove',e=>{
+  if(e.pointerType==='touch')return;          /* a finger is not a cursor to look at */
+  hasMouse=true;
+  mx=e.clientX/innerWidth*2-1;my=-(e.clientY/innerHeight*2-1);
+});
 
 document.body.classList.add('has3d');
 
@@ -1079,8 +1084,24 @@ function frame(){
     if(!RM)mixer.update(dt);
   }else if(model){model.position.y=Math.sin(t*1.6)*.02;}
   if(model){
-    const face=Math.abs(vx)>.05?Math.sign(vx)*1.35:Math.sin(t*.4)*.25+mx*.3;
-    model.rotation.y+=(face-model.rotation.y)*Math.min(1,dt*3.5);
+    /* where the avatar looks. While it is travelling across the page it faces the way it is
+       going. Otherwise it turns to the cursor — measured from its own position rather than
+       from the centre of the window, because it slides left and right between sections and a
+       window-relative angle would have it looking past the pointer. Without a mouse at all
+       (a phone), it keeps the slow idle sway it always had. */
+    let face;
+    if(Math.abs(vx)>.05){
+      face=Math.sign(vx)*1.35;
+    }else if(hasMouse){
+      const halfW=Math.tan(cam.fov*Math.PI/360)*cam.position.z*cam.aspect;
+      /* the true geometric angle is small — the camera sits well back — so drive the turn off
+         how far the cursor is from the avatar as a fraction of the visible half-width. That
+         reads as actually looking at you instead of a polite nod. */
+      face=THREE.MathUtils.clamp((mx*halfW-px)/Math.max(halfW,.001)*.85,-1.35,1.35);
+    }else{
+      face=Math.sin(t*.4)*.25;
+    }
+    model.rotation.y+=(face-model.rotation.y)*Math.min(1,dt*(hasMouse?5:3.5));
   }
   if(!RM){
     grid.rotation.y=t*.12;
