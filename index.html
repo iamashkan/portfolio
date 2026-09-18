@@ -130,7 +130,13 @@ section{position:relative;z-index:2;padding:96px 0}
 .reveal.in{opacity:1;transform:none}
 
 /* about */
-.about{display:grid;grid-template-columns:1.4fr 1fr;gap:54px;align-items:start;margin-top:46px}
+/* the portrait is a full-length studio shot, so it wants a column of its own; stacking it on
+   top of the fact rows left the right side 324px taller than the text and a hole under the
+   copy. The rows now sit beneath the text and the portrait fills the column, so the two sides
+   finish level. Cropping its width costs nothing — the sides are only backdrop. */
+.about{display:grid;grid-template-columns:1.35fr 1fr;gap:54px;align-items:stretch;margin-top:46px}
+.about-body{display:flex;flex-direction:column}
+.about-body .facts{margin-top:auto}
 .about p{color:var(--soft);font-weight:300;font-size:1.05rem;margin-bottom:16px}
 .about p b{color:var(--ink);font-weight:600}
 .facts{border:1px solid var(--line);border-radius:14px;padding:26px;background:var(--panel)}
@@ -293,12 +299,12 @@ footer .f3d{opacity:.6;font-style:italic}
 
 /* the studio backdrop is near-white and this page is not: greyscale plus a slight pull-down
    settles it into the panel, and a gradient hands the bottom edge back to the card. */
-.facts-portrait{position:relative;margin:-26px -26px 18px;border-radius:14px 14px 0 0;overflow:hidden;
-  aspect-ratio:3/4;background:#111}
-.facts-portrait img{width:100%;height:100%;object-fit:cover;object-position:50% 20%;display:block;
+.facts-portrait{position:relative;margin:0;border-radius:14px;overflow:hidden;
+  height:100%;min-height:430px;background:#111;border:1px solid var(--line)}
+.facts-portrait img{width:100%;height:100%;object-fit:cover;object-position:50% 22%;display:block;
   filter:grayscale(1) contrast(1.06) brightness(.82)}
-.facts-portrait::after{content:"";position:absolute;inset:auto 0 0 0;height:42%;
-  background:linear-gradient(to bottom,transparent,#0a0a0a)}
+.facts-portrait::after{content:"";position:absolute;inset:auto 0 0 0;height:34%;
+  background:linear-gradient(to bottom,transparent,rgba(10,10,10,.92))}
 
 /* soft cursor ring (desktop only) */
 #cursor{position:fixed;left:-100px;top:-100px;width:26px;height:26px;border:1.5px solid rgba(255,255,255,.65);
@@ -336,6 +342,8 @@ footer .f3d{opacity:.6;font-style:italic}
   section{padding:64px 0}
   .navlinks{display:none}
   .about{grid-template-columns:1fr;gap:30px}
+  .facts-portrait{height:auto;min-height:0;aspect-ratio:4/5}
+  .about-body .facts{margin-top:0}
   .pub{grid-template-columns:54px 1fr;gap:14px}.pub .go{grid-column:2}
   .edu-row{grid-template-columns:1fr}
 }
@@ -428,21 +436,21 @@ footer .f3d{opacity:.6;font-style:italic}
     <h2 class="sec-title">About</h2>
   </div>
   <div class="about">
-    <div>
+    <div class="about-body">
       <p>Ashkan Aghamoali is an <b>XR developer and digital twin engineer</b> with the Mechanical Intelligence Research Group at London South Bank University (LSBU), where the AR work grew out of research combining machine learning with bio-inspired structural engineering.</p>
       <p>He develops Python-based automation around CAE / Abaqus simulations, trains machine-learning models to predict structural behaviour from large simulation datasets, and applies optimization and sensitivity analysis to inform design decisions. In parallel, he builds <b>Extended Reality (AR/VR) applications</b> for visualising simulations, finite-element analysis and parametric models.</p>
       <p>He holds an MSc in Digital Electronic Systems and a BSc in Electrical &amp; Electronics Engineering from the University of Guilan, and is a gold-medal-winning member of the International Federation of Inventors' Associations (IFIA).</p>
+      <div class="facts">
+        <div class="row"><span class="k">Role</span><span class="v">XR Developer / Digital Twin Engineer</span></div>
+        <div class="row"><span class="k">Affiliation</span><span class="v">LSBU — MI Research Group</span></div>
+        <div class="row"><span class="k">Location</span><span class="v">Dubai, UAE</span></div>
+        <div class="row"><span class="k">Education</span><span class="v">MSc · BSc, Univ. of Guilan</span></div>
+        <div class="row"><span class="k">Languages</span><span class="v">English · Persian</span></div>
+      </div>
     </div>
-    <div class="facts">
-      <figure class="facts-portrait">
-        <img src="assets/portrait_full.webp" width="675" height="900" loading="lazy" decoding="async" alt="Ashkan Aghamoali">
-      </figure>
-      <div class="row"><span class="k">Role</span><span class="v">XR Developer / Digital Twin Engineer</span></div>
-      <div class="row"><span class="k">Affiliation</span><span class="v">LSBU — MI Research Group</span></div>
-      <div class="row"><span class="k">Location</span><span class="v">Dubai, UAE</span></div>
-      <div class="row"><span class="k">Education</span><span class="v">MSc · BSc, Univ. of Guilan</span></div>
-      <div class="row"><span class="k">Languages</span><span class="v">English · Persian</span></div>
-    </div>
+    <figure class="facts-portrait">
+      <img src="assets/portrait_full.webp" width="675" height="900" loading="lazy" decoding="async" alt="Ashkan Aghamoali">
+    </figure>
   </div>
 </div></section>
 
