@@ -308,8 +308,10 @@ footer .f3d{opacity:.6;font-style:italic}
   background:rgba(0,0,0,.55);backdrop-filter:blur(10px);
   font-family:var(--mono);font-size:.63rem;letter-spacing:.11em;text-transform:uppercase;color:var(--mut);white-space:nowrap}
 .avatar-hud b{color:var(--soft);font-weight:500;letter-spacing:.17em}
+.avatar-hud{max-width:calc(100vw - 44px);overflow:hidden}
 .avatar-hud i{font-style:normal;color:#52525b;margin:0 7px 0 16px}
 .avatar-hud u{text-decoration:none;color:var(--ink);font-variant-numeric:tabular-nums}
+.avatar-hud #hudFocus{max-width:22ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .avatar-hud .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#fff;
   margin-right:9px;box-shadow:0 0 10px rgba(255,255,255,.8);animation:pulse 2.2s infinite}
 @keyframes pulse{50%{opacity:.25}}
@@ -352,6 +354,13 @@ footer .f3d{opacity:.6;font-style:italic}
   border-radius:50%;pointer-events:none;z-index:200;transform:translate(-50%,-50%);opacity:0;
   transition:width .25s,height .25s,background .25s,opacity .4s;mix-blend-mode:screen}
 #cursor.hot{width:48px;height:48px;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.9)}
+/* over the figure the ring opens up and the pointer becomes a hand, so that the one part of
+   the page you can take hold of says so before you try it */
+#cursor.grab{width:58px;height:58px;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.85)}
+body.twin-hot{cursor:grab}
+body.twin-drag,body.twin-drag .wrap,body.twin-drag section{cursor:grabbing}
+/* a drag that turns the figure must not also sweep a selection across the copy behind it */
+body.twin-drag{user-select:none;-webkit-user-select:none}
 @media(hover:none){#cursor{display:none}}
 .proj,.sys,.cert,.scard{will-change:transform}
 
@@ -443,7 +452,7 @@ footer .f3d{opacity:.6;font-style:italic}
     <div class="orbit-stage">
       <div class="twin-stand" id="heroPortrait" aria-hidden="true"><span class="beam"></span><span class="disc"></span></div>
     </div>
-    <div class="avatar-hud" aria-hidden="true"><span class="dot"></span><b>Digital twin</b><i>mesh</i><u id="hudTri">—</u><i>rig</i><u id="hudRig">—</u><i>repr</i><u id="hudRepr">loading</u></div>
+    <div class="avatar-hud" aria-hidden="true"><span class="dot"></span><b>Digital twin</b><i>mesh</i><u id="hudTri">—</u><i>rig</i><u id="hudRig">—</u><i>repr</i><u id="hudRepr">loading</u><i id="hudFocusK" hidden>focus</i><u id="hudFocus" hidden>—</u></div>
   </div>
 </div></div>
 <div class="scroll-hint"><span>Scroll</span><span class="bar"></span></div>
@@ -463,17 +472,17 @@ footer .f3d{opacity:.6;font-style:italic}
   </div>
   <div class="proj-grid">
     <div class="proj"><div class="vid"><span class="tagpill">ML in AR</span><video data-src="assets/demo_g2.mp4" data-poster="assets/demo_g2.jpg" autoplay muted loop playsinline preload="none"></video></div>
-      <div class="body"><h3>Neural Network Prediction Interface</h3><p>An AR panel that takes design parameters through an in-scene keypad and returns neural-network predictions of structural deformation, shown as live metrics and charts.</p><div class="stack"><span>Machine Learning</span><span>Unity3D</span><span>C#</span></div></div></div>
+      <div class="body"><h3 data-twin="nn prediction panel">Neural Network Prediction Interface</h3><p>An AR panel that takes design parameters through an in-scene keypad and returns neural-network predictions of structural deformation, shown as live metrics and charts.</p><div class="stack"><span>Machine Learning</span><span>Unity3D</span><span>C#</span></div></div></div>
     <div class="proj"><div class="vid"><span class="tagpill">Parametric</span><video data-src="assets/demo_g1.mp4" data-poster="assets/demo_g1.jpg" autoplay muted loop playsinline preload="none"></video></div>
-      <div class="body"><h3>Parametric Control Panel in AR</h3><p>Real-time tuning of a lattice structure's parameters — density, radius, height, thickness — through an immersive AR control panel.</p><div class="stack"><span>Unity3D</span><span>Parametric Design</span><span>ARKit</span></div></div></div>
+      <div class="body"><h3 data-twin="parametric panel">Parametric Control Panel in AR</h3><p>Real-time tuning of a lattice structure's parameters — density, radius, height, thickness — through an immersive AR control panel.</p><div class="stack"><span>Unity3D</span><span>Parametric Design</span><span>ARKit</span></div></div></div>
     <div class="proj"><div class="vid"><span class="tagpill">Bio-inspired</span><video data-src="assets/demo_g4.mp4" data-poster="assets/demo_g4.jpg" autoplay muted loop playsinline preload="none"></video></div>
-      <div class="body"><h3>Bio-Inspired Structure in AR</h3><p>Interactive visualisation of a biomimetic structure in augmented reality, with live controls to morph its geometry and explore design variations.</p><div class="stack"><span>Unity3D</span><span>Biomimetics</span><span>AR</span></div></div></div>
+      <div class="body"><h3 data-twin="bio-inspired structure">Bio-Inspired Structure in AR</h3><p>Interactive visualisation of a biomimetic structure in augmented reality, with live controls to morph its geometry and explore design variations.</p><div class="stack"><span>Unity3D</span><span>Biomimetics</span><span>AR</span></div></div></div>
     <div class="proj"><div class="vid"><span class="tagpill">Visualisation</span><video data-src="assets/demo_explain.mp4" data-poster="assets/demo_explain.jpg" autoplay muted loop playsinline preload="none"></video></div>
-      <div class="body"><h3>Step-by-Step AR Explanation</h3><p>An immersive walkthrough presenting a bio-inspired structure and its simulation results, anchored in the user's environment.</p><div class="stack"><span>Unity3D</span><span>AR</span><span>3D Visualisation</span></div></div></div>
+      <div class="body"><h3 data-twin="ar walkthrough">Step-by-Step AR Explanation</h3><p>An immersive walkthrough presenting a bio-inspired structure and its simulation results, anchored in the user's environment.</p><div class="stack"><span>Unity3D</span><span>AR</span><span>3D Visualisation</span></div></div></div>
     <div class="proj"><div class="vid"><span class="tagpill">Robotics in AR</span><video data-src="assets/demo_cobot.mp4" data-poster="assets/demo_cobot.jpg" autoplay muted loop playsinline preload="none"></video></div>
-      <div class="body"><h3>AR Co-bot Interface</h3><p>An augmented-reality interface for collaborative-robot visualisation, linking digital simulation with physical automation.</p><div class="stack"><span>AR</span><span>Robotics</span><span>Unity3D</span></div></div></div>
+      <div class="body"><h3 data-twin="cobot interface">AR Co-bot Interface</h3><p>An augmented-reality interface for collaborative-robot visualisation, linking digital simulation with physical automation.</p><div class="stack"><span>AR</span><span>Robotics</span><span>Unity3D</span></div></div></div>
     <div class="proj"><div class="vid"><span class="tagpill">Robotics in AR</span><video data-src="assets/demo_g5.mp4" data-poster="assets/demo_g5.jpg" autoplay muted loop playsinline preload="none"></video></div>
-      <div class="body"><h3>Real-Time Robotic Joint Visualisation</h3><p>An AR scene visualising a robotic joint in real time alongside sensor/data overlays — bridging simulation data and physical motion.</p><div class="stack"><span>AR</span><span>Robotics</span><span>Unity3D</span></div></div></div>
+      <div class="body"><h3 data-twin="robotic joint">Real-Time Robotic Joint Visualisation</h3><p>An AR scene visualising a robotic joint in real time alongside sensor/data overlays — bridging simulation data and physical motion.</p><div class="stack"><span>AR</span><span>Robotics</span><span>Unity3D</span></div></div></div>
   </div>
 </div></section>
 
@@ -551,7 +560,7 @@ footer .f3d{opacity:.6;font-style:italic}
   <div class="sys-now">
     <div class="sys-now-k"><span class="pulse"></span>Currently building</div>
     <div class="sys-now-b">
-      <h3>Real-time digital twin generation on iOS</h3>
+      <h3 data-twin="ios room scan">Real-time digital twin generation on iOS</h3>
       <p>Turning an iPhone into an industrial scanning tool: room geometry captured live with ARKit&nbsp;+&nbsp;RoomPlan, equipment detected and labelled on-device with Core&nbsp;ML&nbsp;/&nbsp;Vision, nameplates read by OCR, and each scanned asset bound to a real device through an edge gateway over MQTT. Measured data stays strictly separate from AI-inferred data throughout — a twin that quietly mixes the two is worse than no twin at all.</p>
       <div class="stack"><span>Swift</span><span>ARKit</span><span>RoomPlan</span><span>Core ML</span><span>RealityKit</span><span>Node.js</span><span>MQTT</span></div>
     </div>
@@ -562,7 +571,7 @@ footer .f3d{opacity:.6;font-style:italic}
     <article class="sys">
       <div class="sys-i"><div class="sys-n">01</div><div class="sys-state">Simulation · hardware-ready</div></div>
       <div class="sys-b">
-        <h3>Sizing a robot cell against a shredder</h3>
+        <h3 data-twin="motor recovery cell">Sizing a robot cell against a shredder</h3>
         <div class="sys-sub">Circular recovery of end-of-life electric motors · UR5e · ROS 2 Jazzy · MoveIt 2 · Gazebo</div>
         <p>End-of-life motors today are mostly shredded, with their copper recovered by eddy-current separation. So the useful question was never whether a cobot <em>can</em> take a motor apart — it is the motor size above which doing so beats shredding. That framing decided the architecture: the cell is modelled per separable component rather than per motor, so the crossover can be read straight off the results. A UR5e with a Robotiq 2F-85 gripper sorts eleven components across reuse / repair / replace / recycle stations, MoveIt 2 plans the 17-step pick-and-place workflow through <code>ros2_control</code>, and a Python decision engine scores each part's health and risk from a Digital Product Passport and sensor stream.</p>
         <p class="sys-limit"><span class="k">Limit</span> Perception is mocked. The motion planning, workcell and decision engine are real; what a camera actually sees on a corroded motor is not something I could simulate honestly, so I did not pretend to.</p>
@@ -573,7 +582,7 @@ footer .f3d{opacity:.6;font-style:italic}
     <article class="sys">
       <div class="sys-i"><div class="sys-n">02</div><div class="sys-state">Simulation · real datasets</div></div>
       <div class="sys-b">
-        <h3>What an RGB camera cannot tell you about a battery</h3>
+        <h3 data-twin="battery sorting">What an RGB camera cannot tell you about a battery</h3>
         <div class="sys-sub">End-of-life lithium-ion recovery and robotic sorting · Unity · FastAPI · scikit-learn</div>
         <p>The EU Battery Regulation makes a digital battery passport mandatory for EV, industrial and light-transport batteries from 18 February 2027, which fixes the data model the whole system has to emit — so the passport was built first and the sorting line second, not the other way round. A Unity control twin streams each cell's image to a FastAPI backend that classifies form factor, draws a state-of-health profile from NASA PCoE aging data and scores risk; a decision engine then routes every battery to reuse / remanufacture / recycle / quarantine under selectable policy modes, with an ABB CRB-style cobot sorting it on the line. Built on a real RecyBat24 image subset rather than synthetic data.</p>
         <p class="sys-limit"><span class="k">Limit</span> Cell chemistry — LFP against NMC — cannot be read off an RGB image; a real plant needs XRF or spectroscopy. The classifier is therefore scoped to form factor, and chemistry is carried by the passport instead of being inferred.</p>
@@ -584,7 +593,7 @@ footer .f3d{opacity:.6;font-style:italic}
     <article class="sys">
       <div class="sys-i"><div class="sys-n">03</div><div class="sys-state">Simulation · edge-to-cloud</div></div>
       <div class="sys-b">
-        <h3>Designing against a baseline that wins on energy</h3>
+        <h3 data-twin="highway lighting">Designing against a baseline that wins on energy</h3>
         <div class="sys-sub">Emergency-aware adaptive lighting for a 6-lane smart motorway · STM32 · MQTT · Unity 6</div>
         <p>The emergency case is the thesis. When an ambulance, police or fire vehicle is detected, the system raises a 100% safety corridor ahead of it — in that direction only. Outside emergencies the road holds a configurable eco level and brightens just the luminaires ahead of each vehicle, while modelling energy, CO₂, luminaire health, remaining useful life and Re-X lifecycle decisions. It is built across the full stack rather than as a controller in isolation: telemetry over MQTT into a Streamlit operations dashboard, a five-node STM32 edge-controller network on RS485 / CAN simulated in Wokwi, and a Unity 6 night-highway twin.</p>
         <p class="sys-limit"><span class="k">Limit</span> Many highway authorities now switch motorway lighting off entirely between midnight and 05:30. Against that baseline this system loses on energy outright — which is why it is argued on emergency response and luminaire lifecycle, and not on kilowatt-hours saved.</p>
@@ -821,7 +830,10 @@ const canvas=document.getElementById('scene3d');
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 /* phones and metered links get the lighter body file, no multisampling and a capped pixel
    ratio: a full-screen buffer at DPR 3 with MSAA is most of a phone's GPU budget. */
-const LIGHT=innerWidth<861||(navigator.connection||{}).saveData===true;
+/* must track the @media(max-width:900px) block: below it the copy takes back the full
+   measure, so there is no lane left for the figure to be placed in. */
+const WIDE=()=>innerWidth>900;
+const LIGHT=!WIDE()||(navigator.connection||{}).saveData===true;
 let renderer=null;
 /* Standing up WebGL costs a shader compile that can lock a phone's main thread for a second or
    more, and not one pixel of it is content. Hold the whole scene back until the page has loaded
@@ -917,8 +929,14 @@ reg(glowMat);
 const glow=new THREE.Mesh(new THREE.PlaneGeometry(2.6,2.6),glowMat);
 glow.rotation.x=-Math.PI/2;glow.position.y=.012;G.add(glow);
 
+/* HUD state. The DOM is only touched when a field actually changes — this runs inside the
+   render loop, and writing the same string 60 times a second is layout work for nothing. */
+const hud={tri:0,rig:0,el:{tri:document.getElementById('hudTri'),
+  rig:document.getElementById('hudRig'),repr:document.getElementById('hudRepr'),
+  focus:document.getElementById('hudFocus'),focusK:document.getElementById('hudFocusK')},last:{},focus:''};
+
 /* avatar — humanoid GLB with idle/walk/run, wireframe shell sharing the same skeleton */
-let model=null,mixer=null,mYMin=0,mYH=1;const act={},clipRole={};
+let model=null,mixer=null,mYMin=0,mYH=1,mXHalf=0;const act={},clipRole={};
 /* clips arrive across two same-rig files: avatar.glb carries the body and its idle clip,
    avatar1.glb is geometry-free and supplies only the second motion.
    the avatar exports reuse one clip name for every motion, so a file can declare its
@@ -967,8 +985,13 @@ function adopt(gltf,role){
   mixer=new THREE.AnimationMixer(m);
   registerClips(gltf.animations,role);
   if(RM&&mixer)mixer.update(.03);
-  /* measure local height so the scan line can travel feet→head regardless of scroll scale */
+  /* measure local extents: height so the scan line can travel feet→head regardless of scroll
+     scale, half-width so the pointer hit test knows how wide the figure actually is */
   const bb=new THREE.Box3().setFromObject(m);mYMin=bb.min.y;mYH=Math.max(.001,bb.max.y-bb.min.y);
+  /* Box3 over a skinned mesh measures the bind pose, and this rig binds in a T-pose — taken
+     at face value the grab region reached an arm's length either side of a figure that is
+     actually standing with its arms down. Clamp it to a standing silhouette. */
+  mXHalf=Math.max(.05,Math.min(Math.max(Math.abs(bb.min.x),Math.abs(bb.max.x)),mYH*.17));
   G.add(m);model=m;
   /* real figures for the HUD, counted off the shells gathered above rather than guessed:
      index count where the geometry is indexed, position count where it is not. */
@@ -998,7 +1021,14 @@ function mannequin(){ /* offline fallback: capsule humanoid, no skeleton, no hei
     add(new THREE.CapsuleGeometry(.055,.32,5,12),s*.10,.24,0);
     add(new THREE.BoxGeometry(.09,.06,.22),s*.10,.03,.05);
   });
+  const bb=new THREE.Box3().setFromObject(g);mYMin=bb.min.y;mYH=Math.max(.001,bb.max.y-bb.min.y);
+  /* Box3 over a skinned mesh measures the bind pose, and this rig binds in a T-pose — taken
+     at face value the grab region reached an arm's length either side of a figure that is
+     actually standing with its arms down. Clamp it to a standing silhouette. */
+  mXHalf=Math.max(.05,Math.min(Math.max(Math.abs(bb.min.x),Math.abs(bb.max.x)),mYH*.17));
   G.add(g);model=g;
+  let tri=0;g.traverse(o=>{const q=o.geometry;if(q)tri+=Math.floor((q.index?q.index.count:(q.attributes.position?.count||0))/3);});
+  hud.tri=Math.floor(tri/2);hud.rig=0;   /* body and wireframe shell share each geometry */
 }
 /* one avatar, one body file; mannequin() is the offline fallback if it cannot load.
    role  : which motion the body file's own clip supplies
@@ -1029,7 +1059,7 @@ const WP={
      whose content is a full-width grid (the XR reel, the certificates) have no gutter to
      spare, so the figure is pushed past the edge and dropped to ambient there; the three
      lane sections narrow their copy instead and keep it lit beside the text. */
-  header:        {fx:.5,   s:1.12,dim:1,   real:.82,blue:0,  diss:.08,anim:'idle'},  // you, with the scan edge already at the hairline
+  header:        {fx:.5,   s:1.12,dim:1,   real:1,  blue:0,  diss:0,  anim:'idle'},  // the real you, before anything is scanned
   work:          {fx:-1.05,s:.94, dim:.2,  real:.3, blue:0,  diss:.24,anim:'smoke'}, // ambient behind the reel
   about:         {fx:1.06, s:.9,  dim:.18, real:.08,blue:0,  diss:0,  anim:'idle'},  // ambient; the portrait carries this one
   research:      {fx:-.62, s:.9,  dim:.5,  real:0,  blue:0,  diss:.32,anim:'idle'},  // lane — dispersing
@@ -1074,7 +1104,7 @@ function sample(sy){
   const mode={real:L(a.real,b.real,u),blue:L(a.blue,b.blue,u),diss:L(a.diss,b.diss,u),
     animA:a.anim,animB:b.anim,au:u};
   const halfW=Math.tan(cam.fov*Math.PI/360)*cam.position.z*cam.aspect;
-  if(innerWidth>=861)return{x:fx*halfW,s,dim:d,...mode};
+  if(WIDE())return{x:fx*halfW,s,dim:d,...mode};
   /* on a phone the avatar cannot step aside — there is no side column, so the hero text
      scrolls straight over it. Squaring `real` keeps the photoreal figure at the very top,
      where it has the screen to itself, then drops it to a faint wireframe as soon as copy
@@ -1095,24 +1125,98 @@ onResize();
 
 let mx=0,my=0;
 let hasMouse=false;
+
+/* ---- handling the twin -----------------------------------------------------
+   The figure used to turn toward the cursor wherever it was on the page, so it read as the
+   avatar watching the visitor around the room. It now stands square to the front and looks
+   up only when the pointer is actually over it, and it can be taken hold of and turned —
+   which is what the grab cursor over it is promising.
+
+   The canvas is pointer-events:none and sits behind the whole page, so there is no element
+   to hover: the figure's own bounding box is projected to screen coordinates instead and
+   tested against the pointer. Two things guard that test. It is off while the figure is
+   dimmed back to ambient, so the faint shape crossing behind a paragraph is not quietly
+   grabbable; and it never claims a point that belongs to something interactive above it,
+   so the page keeps every one of its own clicks. */
+const FINE=matchMedia('(hover:hover) and (pointer:fine)').matches;
+const hit={over:false,drag:false,yaw:0,mx:-1e4,my:-1e4,cx:0,cy:0,hw:0,hh:0,lastX:0,t:0};
+const _pv=new THREE.Vector3();
+function toScreen(wx,wy){_pv.set(wx,wy,0).project(cam);
+  return{x:(_pv.x*.5+.5)*innerWidth,y:(-_pv.y*.5+.5)*innerHeight};}
+/* recomputed per frame: the figure moves under scroll even when the pointer is still */
+function measureHit(){
+  if(!model||!mXHalf){hit.hw=0;return;}
+  const y0=G.position.y+mYMin*pscale,y1=G.position.y+(mYMin+mYH)*pscale;
+  const a=toScreen(G.position.x,y0),b=toScreen(G.position.x,y1),
+        c=toScreen(G.position.x+mXHalf*pscale,(y0+y1)*.5);
+  hit.cx=(a.x+b.x)*.5;hit.cy=(a.y+b.y)*.5;
+  hit.hh=Math.abs(b.y-a.y)*.5;hit.hw=Math.abs(c.x-hit.cx);
+}
+function overTwin(x,y){
+  if(!FINE||RM||!hit.hw||pdim<.42)return false;
+  if(Math.abs(x-hit.cx)>hit.hw+12||Math.abs(y-hit.cy)>hit.hh+12)return false;
+  const el=document.elementFromPoint(x,y);
+  return !(el&&el.closest('a,button,input,textarea,select,video,summary,label,\
+                           p,h1,h2,h3,h4,li,code,figure,img'));
+}
+const ring=document.getElementById('cursor');
+function setOver(v){
+  if(hit.over===v)return;hit.over=v;
+  document.body.classList.toggle('twin-hot',v);
+  if(ring)ring.classList.toggle('grab',v);
+}
+function endDrag(){
+  if(!hit.drag)return;
+  hit.drag=false;document.body.classList.remove('twin-drag');
+  const wrapped=Math.atan2(Math.sin(hit.yaw),Math.cos(hit.yaw)),shift=wrapped-hit.yaw;
+  hit.yaw=wrapped;if(model)model.rotation.y+=shift;
+  setOver(overTwin(hit.mx,hit.my));
+}
 addEventListener('pointermove',e=>{
   if(e.pointerType==='touch')return;          /* a finger is not a cursor to look at */
   hasMouse=true;
   mx=e.clientX/innerWidth*2-1;my=-(e.clientY/innerHeight*2-1);
+  hit.mx=e.clientX;hit.my=e.clientY;
+  if(hit.drag){
+    hit.yaw=THREE.MathUtils.clamp(hit.yaw+(e.clientX-hit.lastX)*.012,-Math.PI*2,Math.PI*2);
+    hit.lastX=e.clientX;return;
+  }
+  setOver(overTwin(e.clientX,e.clientY));
+});
+addEventListener('pointerdown',e=>{
+  if(e.pointerType==='touch'||e.button!==0||!hit.over)return;
+  hit.drag=true;hit.lastX=e.clientX;
+  document.body.classList.add('twin-drag');
+  e.preventDefault();                          /* a drag on the figure is not a text selection */
+});
+/* every way a drag can end, including the pointer leaving the window mid-turn */
+addEventListener('pointerup',endDrag);
+addEventListener('pointercancel',endDrag);
+addEventListener('blur',endDrag);
+document.addEventListener('pointerleave',()=>{if(!hit.drag)setOver(false)});
+
+/* a card under the pointer is state the twin can answer to: it brightens, and the panel
+   names what is being looked at. Kept additive so it never fights the scroll choreography. */
+let focusW=0,focusOn=0,focusEl=null;
+document.querySelectorAll('.sys,.sys-now,.proj').forEach(c=>{
+  const h=c.querySelector('h3');if(!h)return;
+  const name=h.dataset.twin||h.textContent.trim();
+  c.addEventListener('pointerenter',e=>{if(e.pointerType==='touch')return;
+    focusEl=c;focusOn=1;hud.focus=name;});
+  c.addEventListener('pointerleave',()=>{if(focusEl===c){focusEl=null;focusOn=0;}});
 });
 
 document.body.classList.add('has3d');
-
-/* HUD state. The DOM is only touched when a field actually changes — this runs inside the
-   render loop, and writing the same string 60 times a second is layout work for nothing. */
-const hud={tri:0,rig:0,el:{tri:document.getElementById('hudTri'),
-  rig:document.getElementById('hudRig'),repr:document.getElementById('hudRepr')},last:{}};
 function hudSet(k,v){if(hud.last[k]===v)return;hud.last[k]=v;const e=hud.el[k];if(e)e.textContent=v;}
 function hudTick(){
   hudSet('tri',hud.tri?hud.tri.toLocaleString('en-US')+' tri':'—');
   hudSet('rig',hud.rig?hud.rig+' joints':'—');
   /* name the layer that currently dominates, then how far it has gone */
   const pct=n=>Math.round(n*100)+'%';
+  const fe=hud.el.focus,fk=hud.el.focusK;
+  if(fe&&fk){const on=focusW>.05&&!!hud.focus;
+    if(fe.hidden===on){fe.hidden=!on;fk.hidden=!on;}
+    if(on)hudSet('focus',hud.focus);}
   hudSet('repr', !model ? 'loading'
     : mDiss>.28 ? 'point cloud '+pct(mDiss)
     : mBlue>.3  ? 'blueprint '+pct(mBlue)
@@ -1124,7 +1228,7 @@ const clock=new THREE.Clock();
 let px=sample(scrollY).x,pscale=1,pdim=1,lastSy=scrollY,scrollV=0,appS=0,appA=0;
 let mReal=1,mBlue=0,mDiss=0;   /* smoothed per-section representation weights */
 G.position.x=px;
-window.__holo={THREE,G,cam,scene,renderer,model:()=>model};
+window.__holo={THREE,G,cam,scene,renderer,model:()=>model,hit,overTwin};
 function frame(){
   const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
   const sy=scrollY;
@@ -1140,8 +1244,9 @@ function frame(){
      empty by construction — and on a phone there is no lane to cross at all. */
   const halfWv=Math.tan(cam.fov*Math.PI/360)*cam.position.z*cam.aspect;
   const edge=Math.min(1,Math.abs(px)/(halfWv*.6));   /* 1 by the time it reaches its lane */
-  const cross=(sy<innerHeight*.55||innerWidth<861)?1:(.18+.82*edge*edge);
-  pdim+=(tgt.dim*cross-pdim)*k;
+  const cross=(sy<innerHeight*.55||!WIDE())?1:(.18+.82*edge*edge);
+  focusW+=(focusOn-focusW)*Math.min(1,dt*5);
+  pdim+=(tgt.dim*cross*(1+.4*focusW)-pdim)*k;
   /* per-section representation: scan line follows scroll (real→wireframe), blueprint + dissolve layer on top */
   mReal+=(tgt.real-mReal)*k;mBlue+=(tgt.blue-mBlue)*k;mDiss+=(tgt.diss-mDiss)*k;
   holoU.uTime.value=t;
@@ -1168,25 +1273,32 @@ function frame(){
     if(!RM)mixer.update(dt);
   }else if(model){model.position.y=Math.sin(t*1.6)*.02;}
   if(model){
-    /* the cursor is the only thing that turns it. It used to swing round to face its direction
-       of travel as the page scrolled, and sway gently on its own when idle — both read as the
-       avatar moving by itself. It now rides down the page square to the viewer and turns only
-       when the mouse does, which on a device without one means it never turns at all.
-       Mostly where the cursor is across the window, nudged by where the avatar is standing:
-       a purely avatar-relative angle looked right on paper and wrong on screen, since it
-       stands near the right edge and the right half of the screen then barely moved it. */
-    let face=0;
-    if(hasMouse){
-      const halfW=Math.tan(cam.fov*Math.PI/360)*cam.position.z*cam.aspect;
-      face=THREE.MathUtils.clamp(mx*1.25-(px/Math.max(halfW,.001))*.35,-1.35,1.35);
+    measureHit();
+    /* the figure keeps moving under the pointer as the page scrolls, so hover is re-tested on
+       a slow tick as well as on pointermove — otherwise it walks out from under the cursor
+       and stays lit, or slides under a still cursor and never lights at all */
+    if((hit.t+=dt)>.1){hit.t=0;if(hasMouse&&!hit.drag)setOver(overTwin(hit.mx,hit.my));}
+    /* Square to the front unless the visitor is actually handling it: held, it turns with the
+       pointer; hovered, it looks up toward the cursor; released and left alone, it comes back
+       round to front. Turning is always eased toward hit.yaw rather than written straight to
+       the model, so handing over between those three states can never snap. */
+    if(!hit.drag){
+      const look=hit.over
+        ? THREE.MathUtils.clamp((hit.mx-hit.cx)/Math.max(hit.hw*2.4,1),-1,1)*1.15
+        : 0;
+      hit.yaw+=(look-hit.yaw)*Math.min(1,dt*(hit.over?4:2.6));
     }
-    model.rotation.y+=(face-model.rotation.y)*Math.min(1,dt*6);
+    model.rotation.y+=(hit.yaw-model.rotation.y)*Math.min(1,dt*8);
   }
   if(!RM){
     grid.rotation.y=t*.12;
   }
-  cam.position.x+=(mx*.22-cam.position.x)*Math.min(1,dt*2.5);
-  cam.position.y+=(1.35+my*.12-cam.position.y)*Math.min(1,dt*2.5);
+  /* The camera still drifts with the pointer, but only just. At the old amounts the whole
+     scene swung far enough that the figure read as tracking the visitor around the page —
+     the same impression the gaze had, arriving by a different route. What is left is parallax
+     for depth; turning toward someone is now something only handling it does. */
+  cam.position.x+=(mx*.07-cam.position.x)*Math.min(1,dt*2.5);
+  cam.position.y+=(1.35+my*.04-cam.position.y)*Math.min(1,dt*2.5);
   cam.lookAt(px*.22,.98,0);
   renderer.render(scene,cam);
   requestAnimationFrame(frame);
