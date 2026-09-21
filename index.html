@@ -825,170 +825,134 @@ const key=new THREE.DirectionalLight(0xffffff,1.6);key.position.set(2,4,3);scene
 const G=new THREE.Group();scene.add(G);
 const under=new THREE.PointLight(0xcccccc,1.4,7);under.position.set(0,.25,.7);G.add(under);
 
-/* plain materials for the offline stand-in figure only (mannequin(), if the GLB cannot load) */
-const bodyMat=new THREE.MeshStandardMaterial({color:0x0d2a5c,emissive:0x2f6fd8,emissiveIntensity:.5,
+/* silver transparent body + glowing wireframe mesh */
+const bodyMat=new THREE.MeshStandardMaterial({color:0x2a2a2e,emissive:0xb5b5c0,emissiveIntensity:.5,
   metalness:.15,roughness:.45,transparent:true,opacity:.22,depthWrite:true});
-const wireMat=new THREE.MeshBasicMaterial({color:0x6aaeff,wireframe:true,transparent:true,opacity:.55,
+const wireMat=new THREE.MeshBasicMaterial({color:0xe6e6ea,wireframe:true,transparent:true,opacity:.55,
   blending:THREE.AdditiveBlending,depthWrite:false});
 
-/* ===== the digital twin =====
-   What the figure turns into above the scan line: blue, see-through, lit from within by its
-   own network. It used to be WebGL's built-in wireframe over a grey skin — hard 1px lines,
-   no glow, no nodes — which read as a plain mesh rather than a twin. It is now one material
-   that draws everything itself from barycentric coordinates carried on each triangle:
-     - anti-aliased network lines with a soft halo, measured in screen pixels;
-     - a node of light at every vertex, each breathing on its own phase;
-     - translucent blue glass, brightest toward the silhouette, with the far side of the body
-       showing faintly through the near side for depth;
-     - streaks of light rising through the network from the floor;
-     - where triangles shrink below a few pixels (the face is a third of the model's
-       triangles) the lines melt into glow instead of stacking into a white tangle.
-   Section by section the same twin shifts representation:
-     uBlue  0→1 blueprint — deep fill, pale drafting lines, a contour every 4cm, a measuring sweep
-     uDiss  0→1 point cloud — lines and glass fall away, the nodes carry the figure, then thin out
-   uLineY is the world-height scan line: photoreal below it, twin above. */
-const holoU={uLineY:{value:9},uBand:{value:.16},uBlue:{value:0},uDiss:{value:0},uTime:{value:0},uShow:{value:1},
-  uFlow:{value:RM?0:1},uToLocal:{value:new THREE.Matrix4()},uBase:{value:new THREE.Vector2(0,1)}};
-const HOLO_GLSL=`varying vec3 vWp;varying vec3 vNw;varying vec3 vBary;varying vec3 vCR;
-uniform float uLineY;uniform float uBand;uniform float uBlue;uniform float uDiss;uniform float uTime;
-uniform float uFlow;uniform mat4 uToLocal;uniform vec2 uBase;
+/* ===== per-section "representation modes" for the digital twin =====
+   uLineY  : world-space scan line — real skin shows below it, hologram above (scroll-driven feet↔head).
+   uBlue   : 0→1 blueprint (the Systems section): deep blue fill, section contours, a measuring sweep.
+   uDiss   : 0→1 disintegration — randomly discards fragments so the body breaks into a point/data cloud (XR).
+   uScan   : colour of the scan line.
+   One accent, used only where something is moving: the same blue as the profile's badges. The
+   figure itself stays silver; colour arrives as data rising through it from the floor — the
+   way sensor readings from the physical asset feed its twin — slow, sparse, never a wash. */
+const holoU={uLineY:{value:9},uBand:{value:.16},uScan:{value:new THREE.Color(0xa9ccff)},
+  uBlue:{value:0},uDiss:{value:0},uTime:{value:0},
+  uAccent:{value:new THREE.Color(0x5aa2ff)},uFlow:{value:RM?0:1},uShow:{value:1},
+  uToLocal:{value:new THREE.Matrix4()},uBase:{value:new THREE.Vector2(0,1)}};
+const HOLO_GLSL=`varying vec3 vWp;varying vec3 vNw;
+uniform float uLineY;uniform float uBand;uniform vec3 uScan;uniform float uBlue;uniform float uDiss;
+uniform float uTime;uniform vec3 uAccent;uniform float uFlow;uniform mat4 uToLocal;uniform vec2 uBase;uniform float uShow;
 float hh2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float hh3(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}
 float vn3(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);
   return mix(mix(mix(hh3(i),hh3(i+vec3(1,0,0)),f.x),mix(hh3(i+vec3(0,1,0)),hh3(i+vec3(1,1,0)),f.x),f.y),
              mix(mix(hh3(i+vec3(0,0,1)),hh3(i+vec3(1,0,1)),f.x),mix(hh3(i+vec3(0,1,1)),hh3(i+vec3(1,1,1)),f.x),f.y),f.z);}
 `;
-const TWIN_FRAG=`
-float vHy=vWp.y;
-float vis=smoothstep(uLineY-uBand,uLineY+uBand,vHy);
-if(vis<0.02)discard;
-vec3 lp=(uToLocal*vec4(vWp,1.0)).xyz;                   /* the figure's own frame */
-float hN=clamp((lp.y-uBase.x)/uBase.y,0.0,1.0);         /* 0 feet .. 1 head */
-float fres=pow(1.0-abs(dot(normalize(vNw),normalize(cameraPosition-vWp))),2.2);
-float side=gl_FrontFacing?1.0:0.2;                      /* the far side, faintly, through the near */
-
-/* the network, in screen pixels */
-vec3 fw=max(fwidth(vBary),vec3(1e-5));
-vec3 ed=vBary/fw;
-float dE=min(min(ed.x,ed.y),ed.z);                      /* px to the nearest edge */
-float triPx=1.0/max(max(fw.x,fw.y),fw.z);               /* how many px across this triangle is */
-float lod=smoothstep(4.5,13.0,triPx);
-float shim=mix(1.0,0.8+0.4*vn3(lp*5.0+vec3(0.0,-uTime*0.25,0.0)),uFlow);
-float line=(1.0-smoothstep(0.35,1.35,dE))*lod*shim;
-float halo=exp(-dE*0.55)*0.45*lod*shim;
-
-/* nodes: a point of light at each vertex, each breathing on its own phase */
-float mx=max(max(vBary.x,vBary.y),vBary.z);
-float rN=vBary.x>=mx?vCR.x:(vBary.y>=mx?vCR.y:vCR.z);
-float node=(1.0-smoothstep(0.8,2.2,(1.0-mx)*triPx))*smoothstep(6.0,14.0,triPx);
-node*=mix(1.0,0.55+0.45*sin(uTime*2.2+rN*6.2832),uFlow);
-
-/* point cloud: the lines and the glass fall away, the nodes carry it, then thin out */
-float pc=smoothstep(0.0,0.3,uDiss);
-node*=(1.0+1.9*pc)*step(uDiss*0.8,rN);
-line*=1.0-0.85*pc;halo*=1.0-0.8*pc;
-
-/* light rising through the network: soft streaks, each ~11cm column on its own clock */
-vec2 cell=floor(lp.xz*9.0),cf=fract(lp.xz*9.0);
-float r1=hh2(cell),r2=hh2(cell+17.3);
-float st=uTime*(0.12+0.08*r2)+r1;
-float pkt=exp(-fract(st-hN)*10.0)*step(0.55,hh2(cell+floor(st-hN)*7.13))*uFlow*(1.0-0.75*uBlue);
-pkt*=smoothstep(0.0,0.42,min(cf.x,1.0-cf.x))*smoothstep(0.0,0.42,min(cf.y,1.0-cf.y));
-
-vec3 deep=vec3(0.03,0.12,0.32),blue=vec3(0.24,0.55,1.0),hi=vec3(0.80,0.92,1.0);
-float cv=lp.y*25.0;                                      /* blueprint section contours */
-float cl=1.0-min(abs(fract(cv-0.5)-0.5)/max(fwidth(cv),1e-4),1.0);
-float sweep=exp(-pow((hN-fract(uTime*0.07))/0.0065,2.0))*uFlow;
-float a=diffuseColor.a*vis;
-#ifdef TWIN_NET
-/* the light: lines, halos, nodes, the data rising, the scan edge — additive, so it glows */
-vec3 col=blue*(line*0.95+halo)+hi*node*0.85
-        +(blue*0.5+hi*0.9)*pkt*(line+halo*1.5+node+0.18);
-col=mix(col,vec3(0.55,0.75,1.0)*(line*0.4+halo*0.2+cl*0.7+sweep*0.7)+hi*node*0.2,uBlue);
-col+=blue*exp(-pow((vHy-uLineY)/(uBand*0.55),2.0))*1.1;
-gl_FragColor=vec4(col*side,a);
-#else
-/* the glass: fill and rim — max-blended, so overlapping meshes never add up; where the mesh
-   is too fine for lines (face, eyes, hands) it glows softly instead of going dark */
-float dense=1.0-lod;
-vec3 col=(deep*(0.18+0.9*fres)+blue*0.2*dense)*(1.0-0.7*pc)+blue*fres*0.55*(1.0-0.5*pc);
-col=mix(col,vec3(0.02,0.07,0.16)*(0.4+fres),uBlue);
-gl_FragColor=vec4(col*side*a,a);                        /* max ignores alpha: fade in the colour */
-#endif
-`;
-/* Two layers from the one shader. The glass is max-blended: added up, every overlapping
-   layer brightened the pixel, so the face showed its insides — eye sockets and mouth dark
-   where fewer surfaces overlapped, the teeth a bright ring. With max the brightest layer
-   wins and the face reads as one surface. The light is additive: that stacking is exactly
-   what makes a network shine, and on the face it has nothing to stack (lines melt there). */
-const twinGlass=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.9,
-  blending:THREE.CustomBlending,blendEquation:THREE.MaxEquation,
-  blendSrc:THREE.OneFactor,blendDst:THREE.OneFactor,depthWrite:false,side:THREE.DoubleSide});
-const twinMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.9,
-  blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
-twinMat.defines={TWIN_NET:1};
-function twinShader(sh){
-  for(const k in holoU)sh.uniforms[k]=holoU[k];
-  sh.vertexShader='attribute vec3 bary;attribute vec3 cornerRnd;\n'+
-    'varying vec3 vWp;varying vec3 vNw;varying vec3 vBary;varying vec3 vCR;\n'+
-    sh.vertexShader.replace('#include <skinning_vertex>',
-      '#include <skinning_vertex>\n\tvBary=bary;vCR=cornerRnd;\n'+
-      '\tvWp=(modelMatrix*vec4(transformed,1.0)).xyz;\n'+
+function heightMask(mat,side){
+  const top=side==='top',wire=!!mat.wireframe;
+  if(top){
+    mat.transparent=true;
+    /* the blueprint's section contours are anti-aliased with fwidth, which WebGL1 must ask for */
+    mat.extensions=Object.assign(mat.extensions||{},{derivatives:true});
+  }else{
+    /* real layer renders as a normal OPAQUE model so the body skin and the hair sort by depth
+       correctly (transparent + depthWrite:false on the hair was letting the scalp cover it → bald head).
+       alpha-test keeps any hair-card cutouts; the scan line clips the top off via a dithered discard. */
+    mat.transparent=false;mat.depthWrite=true;if(!(mat.alphaTest>0))mat.alphaTest=0.5;
+  }
+  const fade=mat.blending===THREE.AdditiveBlending?'gl_FragColor.rgb*=vis;':'gl_FragColor.a*=vis;';
+  mat.onBeforeCompile=sh=>{
+    for(const k in holoU)sh.uniforms[k]=holoU[k];
+    sh.vertexShader='varying vec3 vWp;varying vec3 vNw;\n'+sh.vertexShader.replace('#include <skinning_vertex>',
+      '#include <skinning_vertex>\n\tvWp=(modelMatrix*vec4(transformed,1.0)).xyz;\n'+
       '#ifdef USE_SKINNING\n\tvNw=normalize(mat3(modelMatrix)*objectNormal);\n'+
       '#else\n\tvNw=normalize(mat3(modelMatrix)*normal);\n#endif\n');
-  sh.fragmentShader=HOLO_GLSL+sh.fragmentShader.replace('#include <dithering_fragment>',TWIN_FRAG);
-}
-for(const [m,key] of [[twinGlass,'twin_glass'],[twinMat,'twin_net']]){
-  /* line widths and the blueprint contours come from fwidth, which WebGL1 must ask for */
-  m.extensions={derivatives:true};m.onBeforeCompile=twinShader;m.customProgramCacheKey=()=>key;
-}
-/* The twin needs every triangle to carry its own corners: un-share the vertices, tag each
-   corner with its barycentric axis, and give each triangle the three corners' random seeds
-   so a node looks the same from every triangle that touches it. The seed is hashed from the
-   vertex position, not its index, so seams in the mesh do not split a node in two. */
-function twinGeometry(src){
-  const g=src.index?src.toNonIndexed():src.clone(),P=g.attributes.position,n=P.count;
-  const bary=new Float32Array(n*3),cr=new Float32Array(n*3);
-  const seed=i=>{const v=Math.sin(Math.round(P.getX(i)*1e4)*12.9898+Math.round(P.getY(i)*1e4)*78.233+
-    Math.round(P.getZ(i)*1e4)*37.719)*43758.5453;return v-Math.floor(v);};
-  for(let t=0;t+2<n;t+=3){
-    const r0=seed(t),r1=seed(t+1),r2=seed(t+2);
-    for(let k=0;k<3;k++){const v=(t+k)*3;bary[v+k]=1;cr[v]=r0;cr[v+1]=r1;cr[v+2]=r2;}
-  }
-  g.setAttribute('bary',new THREE.BufferAttribute(bary,3));
-  g.setAttribute('cornerRnd',new THREE.BufferAttribute(cr,3));
-  return g;
-}
-
-/* the photoreal layer: the avatar's own materials, opaque, clipped away above the scan line
-   with a dithered discard so the edge is soft without breaking depth sorting */
-function heightMask(mat){
-  /* opaque so the body skin and the hair sort by depth correctly (transparent + depthWrite:false
-     on the hair was letting the scalp cover it → bald head); alpha-test keeps hair-card cutouts */
-  mat.transparent=false;mat.depthWrite=true;if(!(mat.alphaTest>0))mat.alphaTest=0.5;
-  mat.onBeforeCompile=sh=>{
-    sh.uniforms.uLineY=holoU.uLineY;sh.uniforms.uBand=holoU.uBand;sh.uniforms.uShow=holoU.uShow;
-    sh.vertexShader='varying vec3 vWp;\n'+sh.vertexShader.replace('#include <skinning_vertex>',
-      '#include <skinning_vertex>\n\tvWp=(modelMatrix*vec4(transformed,1.0)).xyz;');
-    sh.fragmentShader='varying vec3 vWp;\nuniform float uLineY;uniform float uBand;uniform float uShow;\n'+
-      sh.fragmentShader.replace('#include <dithering_fragment>',
-        /* uShow fades the photoreal layer with the twin — dithered, since it is opaque — so it
-           is hidden over full-width content too; before, only the hologram faded and the
-           unscanned legs stayed drawn over the cards. '<=' so that zero is really zero: with
-           '<' any cell whose hash came out exactly 0 was never discarded, and a scatter of
-           skin-coloured pixels leaked through a figure that should be fully scanned. */
-        'float vis=(1.0-smoothstep(uLineY-uBand,uLineY+uBand,vWp.y))*uShow;\n'+
+    let body='float vHy=vWp.y;\nfloat _a=smoothstep(uLineY-uBand,uLineY+uBand,vHy);\n';
+    if(top){
+      body+='float vis=_a;\n'+
+        /* everything is measured in the figure's own frame, so every pattern rides on the body
+           as it walks and turns instead of sliding through it */
+        'vec3 lp=(uToLocal*vec4(vWp,1.0)).xyz;\n'+
+        /* Point cloud. The skin is cut into ~2cm cells fixed to the body; as uDiss rises each
+           cell shrinks from a full cube to a small sphere, so the surface condenses into fine
+           LiDAR-like points, and then cells drop out as it disperses. (It used to drop whole
+           cubes on a grid that jumped every two seconds: square pixels, flickering.) The
+           network is not cut — it stays whole behind the points as the scaffold. */
+        'vec3 vc=lp*46.0;\nfloat h=hh3(floor(vc));\nfloat dz=smoothstep(0.0,0.3,uDiss);\n'+
+        (wire?'':'if(dz>0.001){if(h<uDiss*0.85)discard;if(length(fract(vc)-0.5)>mix(0.9,0.26,dz))discard;}\n')+
+        'if(vis<0.02)discard;\n'+fade+'\n'+
+        'float hN=clamp((lp.y-uBase.x)/uBase.y,0.0,1.0);\n'+
+        'float fres=pow(1.0-abs(dot(normalize(vNw),normalize(cameraPosition-vWp))),2.0);\n'+
+        /* data rising through the network: strands, each ~11cm column on its own clock and
+           speed, firing on only some of its cycles — irregular, like traffic, not rings */
+        'vec2 cell=floor(lp.xz*9.0);\n'+
+        'float r1=hh2(cell),r2=hh2(cell+17.3);\n'+
+        'float st=uTime*(0.12+0.08*r2)+r1;\n'+
+        'float pkt=exp(-fract(st-hN)*10.0)*step(0.55,hh2(cell+floor(st-hN)*7.13))*uFlow*(1.0-0.75*uBlue);\n'+
+        /* soft sides: a streak of light, brightest down its middle, not a lit rectangle */
+        'vec2 cf=fract(lp.xz*9.0);\n'+
+        'pkt*=smoothstep(0.0,0.42,min(cf.x,1.0-cf.x))*smoothstep(0.0,0.42,min(cf.y,1.0-cf.y));\n'+
+        'float shim=mix(1.0,0.82+0.34*vn3(lp*5.0+vec3(0.0,-uTime*0.25,0.0)),uFlow);\n'+
+        /* the head is the densest part of the mesh — eyes, teeth and mouth are meshes of their
+           own inside it — and additive lines stack there into a white mask with dark sockets.
+           Bring it back to the body's level. The data passing through is left at full. */
+        'float headDamp=mix(1.0,0.5,smoothstep(0.83,0.88,hN));\n';
+      body+=wire
+        /* the network: silhouettes carry the light and the interior recedes, so it reads as a
+           volume rather than a flat net; cool silver, or pale drafting blue on the blueprint */
+        ? 'vec3 base=gl_FragColor.rgb*(0.8+0.8*fres)*shim*headDamp;\n'+
+          'base=mix(base,base*vec3(0.82,0.92,1.12),0.6);\n'+
+          'base=mix(base,dot(base,vec3(0.3333))*vec3(0.62,0.80,1.0)*1.35,uBlue);\n'+
+          'base*=1.0-0.45*dz;\n'+                       /* recedes to a scaffold behind the points */
+          'gl_FragColor.rgb=base+uAccent*pkt*vis*3.5;\n'
+        /* the skin: a cool glassy rim; on the blueprint, deep blue with a section contour
+           every 4cm and a single measuring plane sweeping slowly up the body */
+        : 'vec3 f=gl_FragColor.rgb;\n'+
+          'f=mix(f,f*vec3(0.85,0.93,1.1),0.5)+uAccent*fres*0.35*uFlow;\n'+
+          'float cv=lp.y*25.0;\n'+
+          'float cl=1.0-min(abs(fract(cv-0.5)-0.5)/max(fwidth(cv),1e-4),1.0);\n'+
+          'float sweep=exp(-pow((hN-fract(uTime*0.07))/0.0065,2.0))*uFlow;\n'+
+          'f=mix(f,vec3(0.03,0.09,0.18)+vec3(0.55,0.75,1.0)*(cl*0.7+sweep*0.85),uBlue);\n'+
+          'gl_FragColor.a=min(1.0,mix(gl_FragColor.a,gl_FragColor.a*(1.0+2.2*cl+2.2*sweep),uBlue));\n'+
+          /* the strand also glows softly inside the glass, so it reads as light travelling
+             through the body rather than as specks on the lines */
+          'gl_FragColor.rgb=mix(f,uAccent,pkt*0.45);\n'+
+          /* scaled by the material's opacity: added on its own, the streaks kept showing while
+             the twin was faded out over the cards — small specks rising through a hidden figure */
+          'gl_FragColor.a=min(1.0,gl_FragColor.a+pkt*0.22*vis*opacity);\n';
+      /* point cloud: what survives shimmers softly in cool white, and the voxels about to go
+         catch the accent as they scatter */
+      if(!wire)body+=
+        /* the points: cool white, each breathing on its own phase, bright enough to read as
+           light rather than as a dim skin; the ones about to drop out catch the accent */
+        'float tw=mix(1.0,0.7+0.3*sin(uTime*1.7+fract(h*91.7)*6.2832),uFlow);\n'+
+        'gl_FragColor.rgb=mix(gl_FragColor.rgb,vec3(0.80,0.89,1.0)*tw,dz*0.85);\n'+
+        'gl_FragColor.a=min(1.0,mix(gl_FragColor.a,gl_FragColor.a*3.4*headDamp,dz));\n'+
+        'gl_FragColor.rgb+=uAccent*smoothstep(uDiss*0.85+0.08,uDiss*0.85,h)*dz*1.2;\n';
+    }else{
+      /* opaque dither clip: keep the real skin below the line, soft edge without breaking depth sort.
+         uShow fades this layer with the hologram — dithered, since it is opaque — so it is hidden
+         over full-width content too; before, only the hologram faded and the unscanned legs stayed
+         drawn over the cards. '<=' so that zero is really zero: with '<' any cell whose hash came
+         out exactly 0 was never discarded, and a scatter of skin-coloured pixels leaked through. */
+      body+='float vis=(1.0-_a)*uShow;\n'+
         'float hb=fract(sin(dot(floor(vWp*130.0),vec3(12.9898,78.233,37.719)))*43758.5453);\n'+
-        'if(vis<=hb) discard;\n'+
-        /* the scan edge, where the skin is being read into the twin */
-        'gl_FragColor.rgb+=vec3(0.36,0.62,1.0)*exp(-pow((vWp.y-uLineY)/(uBand*0.55),2.0))*0.9*uShow;\n'+
-        '#include <dithering_fragment>');
+        'if(vis<=hb) discard;\n';
+    }
+    body+='gl_FragColor.rgb+=uScan*exp(-pow((vHy-uLineY)/(uBand*0.55),2.0))*0.7;\n';
+    sh.fragmentShader=HOLO_GLSL+
+      sh.fragmentShader.replace('#include <dithering_fragment>',body+'#include <dithering_fragment>');
   };
-  mat.customProgramCacheKey=()=>'real2';
+  mat.customProgramCacheKey=()=>'holo2_'+side+(wire?'_wire':'')+(mat.blending===THREE.AdditiveBlending?'_add':'');
   return mat;
 }
-/* additive light stacks per pixel and resists linear dimming, so it fades on a steeper curve */
-const fadeAvatar=[{m:twinGlass,o:twinGlass.opacity,e:1},{m:twinMat,o:twinMat.opacity,e:1.25}];
+heightMask(bodyMat,'top');heightMask(wireMat,'top');
+/* wireframe dims on a steeper curve: additive lines stack per-pixel and resist linear dimming */
+const fadeAvatar=[{m:bodyMat,o:bodyMat.opacity,e:1},{m:wireMat,o:wireMat.opacity,e:1.4}];
 const fadeScene=[];
 const reg=m=>fadeScene.push({m,o:m.opacity});
 
@@ -1050,22 +1014,19 @@ function adopt(gltf,role){
        below the alphaTest would discard the whole body. */
     (Array.isArray(o.material)?o.material:[o.material]).forEach(mat=>{
       if(done.has(mat))return;done.add(mat);
-      heightMask(mat);
+      heightMask(mat,'bottom');
     });
   });
-  /* the twin: one shell per mesh, sharing the skeleton, drawn above the scan line */
-  /* Every surface gets glass, so the eyes, lashes and teeth fill the face instead of leaving
-     holes in it. The light skips those interior meshes (and the tongue skips both): they
-     would only add lines and flare inside the head that nobody can read. */
-  shells.filter(src=>!/tongue/i.test(src.name)).forEach(src=>{
-    const geo=twinGeometry(src.geometry);
-    const mats=/teeth|eyeao|lash/i.test(src.name)?[twinGlass]:[twinGlass,twinMat];
-    mats.forEach(mat=>{
-      const w=src.isSkinnedMesh?new THREE.SkinnedMesh(geo,mat):new THREE.Mesh(geo,mat);
+  /* hologram layers: blue body fill + glowing wireframe, masked to the upper body, sharing the skeleton */
+  /* The eyes, lashes, teeth and tongue are meshes of their own inside the head — some 2,600
+     triangles on top of a head that is already a third of the model. As hologram they add
+     nothing you can read: the lines stacked into a white mask, and the eyeballs' shells hid
+     the lines behind them as two dark sockets. They keep their place in the photoreal layer. */
+  shells.filter(src=>!/teeth|tongue|eye|lash/i.test(src.name)).forEach(src=>{
+    [bodyMat,wireMat].forEach(mat=>{
+      const w=src.isSkinnedMesh?new THREE.SkinnedMesh(src.geometry,mat):new THREE.Mesh(src.geometry,mat);
       w.position.copy(src.position);w.quaternion.copy(src.quaternion);w.scale.copy(src.scale);
       if(src.isSkinnedMesh)w.bind(src.skeleton,src.bindMatrix);
-      /* glass first, then the light on top of it */
-      w.renderOrder=mat===twinGlass?1:2;
       w.frustumCulled=false;src.parent.add(w);
     });
   });
@@ -1477,10 +1438,6 @@ function frame(){
   const pc=(t%3.6)/3.6;
   ping.scale.setScalar(.16+pc*.9);
   pingMat.opacity=RM?0:.34*(1-pc)*(1-pc)*THREE.MathUtils.smoothstep(pc,0,.06)*(1-mReal)*pdim*appS;
-  /* the floor takes the twin's blue as the figure turns into it; neutral under the real you */
-  const twinAmt=1-mReal;
-  grid.material.color.setRGB(1-.45*twinAmt,1-.18*twinAmt,1+.3*twinAmt);
-  glowMat.color.setRGB(1-.6*twinAmt,1-.32*twinAmt,1);
   /* pad the travel beyond head/feet by >half a band so real:1 has no wireframe scalp
      and real:0 leaves no real sliver at the feet */
   const bandL=.13,marginL=.2;
