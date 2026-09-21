@@ -106,8 +106,10 @@ header h1{font-family:var(--serif);font-weight:500;font-size:clamp(2.8rem,6.5vw,
   background:radial-gradient(ellipse at center,rgba(255,255,255,.13),transparent 68%)}
 .twin-stand .disc::after{content:"";position:absolute;inset:11px 35px;border-radius:50%;
   border:1px solid rgba(255,255,255,.08)}
-  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 2px));
-  mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 2px));opacity:.85}
+/* (Two mask declarations and an opacity used to trail here, left behind when the ring they
+   belonged to was deleted. Outside any rule they made the parser read everything up to the
+   next '{' as one invalid selector — which silently dropped the whole .scroll-hint rule
+   below, so the hint rendered unstyled at the right-hand edge of the hero, cut off.) */
 
 .scroll-hint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);z-index:2;
   font-family:var(--mono);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);
@@ -298,26 +300,32 @@ footer .f3d{opacity:.6;font-style:italic}
 /* 3D hologram canvas — fixed behind content, avatar walks with scroll */
 #scene3d{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;display:block}
 .hero-right{position:relative;min-height:440px;display:flex;justify-content:center;align-items:center}
- /* The caption here used to read "digital twin - it walks as you scroll", which is a claim
-    the visitor has to take on trust. These are the figure's real numbers instead, read off
-    the loaded GLB, with the representation mix updated from the same smoothed weights that
-    drive the shader - so the panel is evidence of the pipeline rather than a label on it.
-    Fixed rather than parked in the hero, because the state it reports keeps changing. */
-.avatar-hud{display:none;position:fixed;right:22px;bottom:20px;z-index:40;align-items:center;
-  border:1px solid var(--line);border-radius:9px;padding:9px 15px;
-  background:rgba(0,0,0,.55);backdrop-filter:blur(10px);
-  font-family:var(--mono);font-size:.63rem;letter-spacing:.11em;text-transform:uppercase;color:var(--mut);white-space:nowrap}
-.avatar-hud b{color:var(--soft);font-weight:500;letter-spacing:.17em}
-.avatar-hud{max-width:calc(100vw - 44px);overflow:hidden}
-.avatar-hud i{font-style:normal;color:#52525b;margin:0 7px 0 16px}
-.avatar-hud u{text-decoration:none;color:var(--ink);font-variant-numeric:tabular-nums}
-.avatar-hud #hudFocus{max-width:22ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ /* The twin's readout: its real triangle and joint counts off the loaded GLB, and the
+    representation mix from the same weights that drive the shader. It is pinned under the
+    figure's feet and follows it down the page, the way a label is anchored to an object in
+    an AR view — so it only ever occupies space the figure already owns. A fixed corner
+    panel sat on the copy in any section whose text ran along that side.
+    It lives at the top level of <body>, not inside the header: a fixed element still
+    paints within its ancestor's stacking context, and nested in the header (z-index 2) it
+    was drawn underneath every section that came after it. */
+.avatar-hud{display:none;position:fixed;left:0;top:0;z-index:40;pointer-events:none;
+  grid-template-columns:auto auto;column-gap:14px;row-gap:4px;align-items:baseline;
+  border:1px solid var(--line);border-radius:9px;padding:10px 14px;
+  background:rgba(0,0,0,.62);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--mut);white-space:nowrap;opacity:0;transition:opacity .35s ease;will-change:transform,opacity}
+.avatar-hud.on{opacity:1}
+.avatar-hud b{grid-column:1/-1;color:var(--soft);font-weight:500;letter-spacing:.17em;margin-bottom:3px}
+.avatar-hud i{font-style:normal;color:#71717a}
+.avatar-hud u{text-decoration:none;color:var(--ink);font-variant-numeric:tabular-nums;
+  max-width:18ch;overflow:hidden;text-overflow:ellipsis}
+.avatar-hud [hidden]{display:none}
 .avatar-hud .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#fff;
   margin-right:9px;box-shadow:0 0 10px rgba(255,255,255,.8);animation:pulse 2.2s infinite}
 @keyframes pulse{50%{opacity:.25}}
 .orbit-stage{transition:opacity .8s ease}
 .has3d .orbit-stage{opacity:0;visibility:hidden;transition:opacity .8s ease,visibility 0s .8s}
-.has3d .avatar-hud{display:flex}
+.has3d .avatar-hud{display:grid}
 
 /* hero title letter cascade */
 .ltr{display:inline-block;opacity:0;transform:translateY(.6em) rotate(5deg);animation:ltr .7s cubic-bezier(.2,.7,.2,1) forwards}
@@ -386,7 +394,7 @@ body.twin-drag{user-select:none;-webkit-user-select:none}
 
 @media(max-width:900px){
   .hero-grid{grid-template-columns:1fr;gap:30px}
-  .hero-right{order:-1;min-height:300px}
+  .hero-right{order:-1;min-height:max(300px,44vh)}
   .orbit-stage{min-height:300px}
   header{min-height:auto;padding:104px 0 64px}
   section{padding:64px 0}
@@ -424,6 +432,7 @@ body.twin-drag{user-select:none;-webkit-user-select:none}
 <div class="bg-grid"></div>
 <div class="bg-orb a"></div><div class="bg-orb b"></div>
 <canvas id="scene3d" aria-hidden="true"></canvas>
+<div class="avatar-hud" id="twinHud" aria-hidden="true"><b><span class="dot"></span>Digital twin</b><i>mesh</i><u id="hudTri">—</u><i>rig</i><u id="hudRig">—</u><i>repr</i><u id="hudRepr">loading</u><i id="hudFocusK" hidden>focus</i><u id="hudFocus" hidden>—</u></div>
 
 <nav id="nav"><div class="wrap">
   <div class="brand">Ashkan Aghamoali</div>
@@ -452,7 +461,6 @@ body.twin-drag{user-select:none;-webkit-user-select:none}
     <div class="orbit-stage">
       <div class="twin-stand" id="heroPortrait" aria-hidden="true"><span class="beam"></span><span class="disc"></span></div>
     </div>
-    <div class="avatar-hud" aria-hidden="true"><span class="dot"></span><b>Digital twin</b><i>mesh</i><u id="hudTri">—</u><i>rig</i><u id="hudRig">—</u><i>repr</i><u id="hudRepr">loading</u><i id="hudFocusK" hidden>focus</i><u id="hudFocus" hidden>—</u></div>
   </div>
 </div></div>
 <div class="scroll-hint"><span>Scroll</span><span class="bar"></span></div>
@@ -699,8 +707,8 @@ body.twin-drag{user-select:none;-webkit-user-select:none}
 </div></section>
 
 <!-- CONTACT -->
-<section id="contact"><div class="wrap reveal">
-  <div class="sec-head" style="text-align:center;margin:0 auto">
+<section id="contact"><div class="wrap lane lane-right reveal">
+  <div class="sec-head" style="text-align:center">
     <div class="sec-eyebrow"><b>07</b> — Contact</div>
     <h2 class="sec-title">Get in touch</h2>
   </div>
@@ -933,10 +941,13 @@ glow.rotation.x=-Math.PI/2;glow.position.y=.012;G.add(glow);
    render loop, and writing the same string 60 times a second is layout work for nothing. */
 const hud={tri:0,rig:0,el:{tri:document.getElementById('hudTri'),
   rig:document.getElementById('hudRig'),repr:document.getElementById('hudRepr'),
-  focus:document.getElementById('hudFocus'),focusK:document.getElementById('hudFocusK')},last:{},focus:''};
+  focus:document.getElementById('hudFocus'),focusK:document.getElementById('hudFocusK')},last:{},focus:'',
+  box:document.getElementById('twinHud'),w:0,h:0,shown:false,x:-1,y:-1};
 
 /* avatar — humanoid GLB with idle/walk/run, wireframe shell sharing the same skeleton */
 let model=null,mixer=null,mYMin=0,mYH=1,mXHalf=0;const act={},clipRole={};
+/* bones that say which way the body is really facing, and the smoothed answer — see bodyFacing() */
+let torso=null,bodyYaw=0,bodyInit=false;
 /* clips arrive across two same-rig files: avatar.glb carries the body and its idle clip,
    avatar1.glb is geometry-free and supplies only the second motion.
    the avatar exports reuse one clip name for every motion, so a file can declare its
@@ -993,6 +1004,10 @@ function adopt(gltf,role){
      actually standing with its arms down. Clamp it to a standing silhouette. */
   mXHalf=Math.max(.05,Math.min(Math.max(Math.abs(bb.min.x),Math.abs(bb.max.x)),mYH*.17));
   G.add(m);model=m;
+  const bone=re=>{let b=null;m.traverse(o=>{if(!b&&o.isBone&&re.test(o.name))b=o;});return b;};
+  torso={lL:bone(/(^|:)LeftUpLeg$/i),lR:bone(/(^|:)RightUpLeg$/i),
+         aL:bone(/(^|:)LeftArm$/i),aR:bone(/(^|:)RightArm$/i),hips:bone(/(^|:)Hips$/i)};
+  if(!torso.lL||!torso.lR)torso=null;
   /* real figures for the HUD, counted off the shells gathered above rather than guessed:
      index count where the geometry is indexed, position count where it is not. */
   let tri=0;const bones=new Set();
@@ -1026,7 +1041,7 @@ function mannequin(){ /* offline fallback: capsule humanoid, no skeleton, no hei
      at face value the grab region reached an arm's length either side of a figure that is
      actually standing with its arms down. Clamp it to a standing silhouette. */
   mXHalf=Math.max(.05,Math.min(Math.max(Math.abs(bb.min.x),Math.abs(bb.max.x)),mYH*.17));
-  G.add(g);model=g;
+  G.add(g);model=g;torso=null;   /* no skeleton: nothing to correct for, and never a stale one */
   let tri=0;g.traverse(o=>{const q=o.geometry;if(q)tri+=Math.floor((q.index?q.index.count:(q.attributes.position?.count||0))/3);});
   hud.tri=Math.floor(tri/2);hud.rig=0;   /* body and wireframe shell share each geometry */
 }
@@ -1055,19 +1070,22 @@ loadAvatar(0);
    real: fraction of body kept as real skin (1=all real → 0=all hologram)
    blue: blueprint recolor · diss: disintegration/point-cloud · anim: motion role */
 const WP={
-  /* dim is the lever that decides whether the twin is a subject or a backdrop. Sections
-     whose content is a full-width grid (the XR reel, the certificates) have no gutter to
-     spare, so the figure is pushed past the edge and dropped to ambient there; the three
-     lane sections narrow their copy instead and keep it lit beside the text. */
+  /* Two kinds of stop. Where a section is prose, its copy narrows to 60% and the twin stands
+     lit in the free half beside it (|fx| .62 — the lane). Where a section is a full-width grid
+     (the XR reel, About's portrait, the certificates) there is nowhere free to stand, so the
+     twin walks out of frame and is faded to nothing there, rather than parked half-lit on the
+     cards. fx .9-1 was not "past the edge": the camera pans 22% of the way toward the figure,
+     so it still stood inside the frame on the last column. Exits leave by the side the twin is
+     already on, so it never has to cross a page of text to get off stage. */
   header:        {fx:.5,   s:1.12,dim:1,   real:1,  blue:0,  diss:0,  anim:'idle'},  // the real you, before anything is scanned
-  work:          {fx:-1.05,s:.94, dim:.2,  real:.3, blue:0,  diss:.24,anim:'smoke'}, // ambient behind the reel
-  about:         {fx:1.06, s:.9,  dim:.18, real:.08,blue:0,  diss:0,  anim:'idle'},  // ambient; the portrait carries this one
+  work:          {fx:1.9,  s:.94, dim:0,   real:.3, blue:0,  diss:.24,anim:'smoke'}, // off stage right
+  about:         {fx:1.9,  s:.9,  dim:0,   real:.08,blue:0,  diss:0,  anim:'idle'},  // off stage right; the portrait carries this one
   research:      {fx:-.62, s:.9,  dim:.5,  real:0,  blue:0,  diss:.32,anim:'idle'},  // lane — dispersing
   systems:       {fx:.62,  s:.92, dim:.55, real:0,  blue:1,  diss:0,  anim:'idle'},  // lane — CAD blueprint
   experience:    {fx:-.62, s:.92, dim:.5,  real:0,  blue:.35,diss:0,  anim:'smoke'}, // lane
-  certifications:{fx:1.06, s:.9,  dim:.18, real:0,  blue:0,  diss:.2, anim:'idle'},  // ambient behind the grid
-  contact:       {fx:0,    s:1.06,dim:.6,  real:0,  blue:0,  diss:.55,anim:'smoke'}};// full hologram, behind centred copy
-const track=[];
+  certifications:{fx:-1.9, s:.9,  dim:0,   real:0,  blue:0,  diss:.2, anim:'idle'},  // off stage left
+  contact:       {fx:-.62, s:1.02,dim:.62, real:0,  blue:0,  diss:.55,anim:'smoke'}};// lane — back on as the full hologram
+const track=[];let footDocTop=Infinity,stageTop=0,stageBot=0;
 function buildTrack(){
   track.length=0;
   /* The last section's centre sits below the furthest the page can actually scroll, so its
@@ -1080,6 +1098,25 @@ function buildTrack(){
     track.push({y:Math.min(maxY,Math.max(0,el.offsetTop+el.offsetHeight*.5-innerHeight*.5)),...cfg});
   });
   track.sort((p,q)=>p.y-q.y);
+  const ft=document.querySelector('footer');
+  footDocTop=ft?ft.getBoundingClientRect().top+scrollY:Infinity;
+  const sg=document.querySelector('.hero-right');
+  if(sg){const r=sg.getBoundingClientRect();stageTop=r.top+scrollY;stageBot=r.bottom+scrollY;}
+}
+/* Phone layout: size the figure to the hero stage — head just under its top edge, feet clear
+   of the copy below — and move it with the page, so it behaves like part of the document
+   rather than a layer the text slides across. World height maps to screen height linearly on
+   the figure's plane, so two projections give the mapping and the fit is solved exactly. */
+function stageFit(sy){
+  if(!(stageBot>stageTop)||!(mYH>0))return null;
+  const a=toScreen(0,0).y,b=toScreen(0,1).y-a;   /* b < 0: up the world is up the screen */
+  if(!(b<0))return null;
+  /* once it has ridden off the top, park it just above the edge instead of sending it on up:
+     far enough above a camera that looks slightly down, it passes behind the image plane and
+     its projection flips, which would hand the hit test and the scan line nonsense */
+  const span=(stageBot-34)-(stageTop+10),feet=Math.max(stageBot-sy-34,-70),head=feet-span;
+  const sc=(head-feet)/(b*mYH);
+  return sc>0?{s:sc,y:(feet-a)/b-mYMin*sc}:null;
 }
 /* Those offsets are read off the laid-out page, but the XR reel loads its posters and videos
    lazily and only then takes its real height. Measuring once on load therefore left every
@@ -1105,13 +1142,12 @@ function sample(sy){
     animA:a.anim,animB:b.anim,au:u};
   const halfW=Math.tan(cam.fov*Math.PI/360)*cam.position.z*cam.aspect;
   if(WIDE())return{x:fx*halfW,s,dim:d,...mode};
-  /* on a phone the avatar cannot step aside — there is no side column, so the hero text
-     scrolls straight over it. Squaring `real` keeps the photoreal figure at the very top,
-     where it has the screen to itself, then drops it to a faint wireframe as soon as copy
-     starts passing across it: still the avatar, no longer competing with the words. The
-     fourth power is steep on purpose — the scan line clears the head first and the torso
-     last, and the torso is exactly what the summary paragraph scrolls across. */
-  return{x:0,s:s*.8,dim:d*.3,...mode,real:Math.pow(mode.real,4)};
+  /* On a phone there is no side column to stand in. It used to stay pinned to the screen at
+     30% while the hero copy scrolled across it — and at rest, before any scrolling, the job
+     title, the name and the summary were already printed over its body. It now stands in the
+     hero's own stage and rides up with it (see stageFit), so nothing is ever drawn over it and
+     it can be shown at full strength. Scale and height come from stageFit, not from here. */
+  return{x:0,s,dim:d,...mode};
 }
 function onResize(){
   renderer.setSize(innerWidth,innerHeight,false);
@@ -1153,11 +1189,75 @@ function measureHit(){
   hit.hh=Math.abs(b.y-a.y)*.5;hit.hw=Math.abs(c.x-hit.cx);
 }
 function overTwin(x,y){
-  if(!FINE||RM||!hit.hw||pdim<.42)return false;
+  if(!FINE||RM||!hit.hw||pdim<.3)return false;
   if(Math.abs(x-hit.cx)>hit.hw+12||Math.abs(y-hit.cy)>hit.hh+12)return false;
   const el=document.elementFromPoint(x,y);
   return !(el&&el.closest('a,button,input,textarea,select,video,summary,label,\
                            p,h1,h2,h3,h4,li,code,figure,img'));
+}
+/* Which way the skeleton is actually facing, read off the bones rather than the model's own
+   rotation. The idle clip stands the character turned about 32 degrees to its side and the
+   second clip about 17, so "rotation.y = 0" was never front: parked on the left of the page
+   the figure looked away toward the edge, with the copy it stood beside behind its shoulder.
+   The line across the hips and the line across the shoulders are each turned a quarter-turn
+   into a facing and blended, which is robust to however the bones' local axes happen to sit.
+   That live reading calibrates the per-clip means below, and is the fallback without them. */
+const _fl=new THREE.Vector3(),_fr=new THREE.Vector3();
+const wrapA=a=>Math.atan2(Math.sin(a),Math.cos(a));
+function acrossYaw(l,r){l.getWorldPosition(_fl);r.getWorldPosition(_fr);_fl.sub(_fr);return Math.atan2(-_fl.z,_fl.x);}
+function bodyFacing(){
+  let sn=0,cs=0;
+  const add=(l,r,w)=>{if(!l||!r)return;const y=acrossYaw(l,r);sn+=Math.sin(y)*w;cs+=Math.cos(y)*w;};
+  add(torso.lL,torso.lR,.6);add(torso.aL,torso.aR,.4);
+  return Math.atan2(sn,cs);
+}
+/* What to cancel is each clip's average turn, not its turn this instant. The smoking clip
+   swings the body through about 33 degrees as part of the performance; following that live
+   meant counter-rotating the whole model against it, so either the planted feet skated or,
+   smoothed, the lean drifted with the swing. Instead each clip's hips track is sampled once
+   across its length for its mean facing, and the offset is the live blend of those means by
+   clip weight — exact at rest, instant across a cross-fade, and the sway is left alone. */
+const _mq=new THREE.Quaternion(),_pq=new THREE.Quaternion(),_hq=new THREE.Quaternion(),_fv=new THREE.Vector3();
+const clipMean={};let yawCal=null;
+function hipsYawOf(localQ){   /* hips forward, in the model's own frame, for a given local rotation */
+  model.getWorldQuaternion(_mq).invert();torso.hips.parent.getWorldQuaternion(_pq);
+  _hq.copy(_mq).multiply(_pq).multiply(localQ);_fv.set(0,0,1).applyQuaternion(_hq);
+  return Math.atan2(_fv.x,_fv.z);
+}
+function meanHipsYaw(clip){
+  const n=torso.hips.name,key=THREE.PropertyBinding.sanitizeNodeName(n)+'.quaternion';
+  const tr=clip&&clip.tracks.find(t=>t.name===key||t.name===n+'.quaternion');
+  if(!tr||!(clip.duration>0))return null;
+  const it=tr.createInterpolant(new Float32Array(4)),q=new THREE.Quaternion();
+  let sn=0,cs=0;
+  for(let i=0;i<48;i++){const v=it.evaluate(clip.duration*i/48);q.set(v[0],v[1],v[2],v[3]);
+    const y=hipsYawOf(q);sn+=Math.sin(y);cs+=Math.cos(y);}
+  return Math.atan2(sn,cs);
+}
+function clipOffset(){
+  if(!torso||!torso.hips||!torso.hips.parent||!mixer)return null;
+  /* whatever the hips' local axes are, tie them to the facing the bones actually show */
+  if(yawCal===null)yawCal=wrapA((bodyFacing()-model.rotation.y)-hipsYawOf(torso.hips.quaternion));
+  let sn=0,cs=0,w=0;
+  for(const r in act){const wt=act[r].getEffectiveWeight();if(!(wt>0))continue;
+    if(!(r in clipMean))clipMean[r]=meanHipsYaw(clipRole[r]);
+    if(clipMean[r]===null)return null;
+    const y=clipMean[r]+yawCal;sn+=Math.sin(y)*wt;cs+=Math.cos(y)*wt;w+=wt;}
+  return w>0?Math.atan2(sn,cs):null;
+}
+/* Pin the readout under the figure's feet — and show it only while the figure is the subject:
+   the hero, or standing in a lane. Crossing behind the copy, dimmed to ambient behind a grid,
+   or standing behind the centred contact text, there is no free space under it to use. */
+function placeHud(sy,halfWv){
+  const el=hud.box;if(!el)return;
+  const show=!!model&&hit.hw>0&&pdim>=.3&&WIDE()&&(sy<innerHeight*.55||Math.abs(px)/halfWv>=.45);
+  if(show!==hud.shown){hud.shown=show;el.classList.toggle('on',show);}
+  if(!show)return;
+  if(!hud.w){hud.w=el.offsetWidth;hud.h=el.offsetHeight;}
+  const x=Math.round(Math.max(16,Math.min(innerWidth-hud.w-16,hit.cx-hud.w/2))),
+        floor=Math.min(innerHeight-16,footDocTop-scrollY-12),
+        y=Math.round(Math.min(floor-hud.h,hit.cy+hit.hh+14));
+  if(x!==hud.x||y!==hud.y){hud.x=x;hud.y=y;el.style.transform=`translate3d(${x}px,${y}px,0)`;}
 }
 const ring=document.getElementById('cursor');
 function setOver(v){
@@ -1207,7 +1307,7 @@ document.querySelectorAll('.sys,.sys-now,.proj').forEach(c=>{
 });
 
 document.body.classList.add('has3d');
-function hudSet(k,v){if(hud.last[k]===v)return;hud.last[k]=v;const e=hud.el[k];if(e)e.textContent=v;}
+function hudSet(k,v){if(hud.last[k]===v)return;hud.last[k]=v;const e=hud.el[k];if(e)e.textContent=v;hud.w=0;}
 function hudTick(){
   hudSet('tri',hud.tri?hud.tri.toLocaleString('en-US')+' tri':'—');
   hudSet('rig',hud.rig?hud.rig+' joints':'—');
@@ -1215,7 +1315,7 @@ function hudTick(){
   const pct=n=>Math.round(n*100)+'%';
   const fe=hud.el.focus,fk=hud.el.focusK;
   if(fe&&fk){const on=focusW>.05&&!!hud.focus;
-    if(fe.hidden===on){fe.hidden=!on;fk.hidden=!on;}
+    if(fe.hidden===on){fe.hidden=!on;fk.hidden=!on;hud.w=0;}
     if(on)hudSet('focus',hud.focus);}
   hudSet('repr', !model ? 'loading'
     : mDiss>.28 ? 'point cloud '+pct(mDiss)
@@ -1228,7 +1328,8 @@ const clock=new THREE.Clock();
 let px=sample(scrollY).x,pscale=1,pdim=1,lastSy=scrollY,scrollV=0,appS=0,appA=0;
 let mReal=1,mBlue=0,mDiss=0;   /* smoothed per-section representation weights */
 G.position.x=px;
-window.__holo={THREE,G,cam,scene,renderer,model:()=>model,hit,overTwin};
+window.__holo={THREE,G,cam,scene,renderer,model:()=>model,hit,overTwin,
+  state:()=>({pdim,px,facing:torso?bodyFacing():null,bodyYaw})};
 function frame(){
   const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
   const sy=scrollY;
@@ -1236,6 +1337,9 @@ function frame(){
   const tgt=sample(sy),k=RM?1:Math.min(1,dt*3);
   const oldx=px;px+=(tgt.x-px)*k;G.position.x=px;
   pscale+=(tgt.s-pscale)*k;G.scale.setScalar(pscale);
+  const fit=WIDE()?null:stageFit(sy);
+  if(fit){px=0;G.position.x=0;pscale=fit.s;G.scale.setScalar(pscale);G.position.y=fit.y;}
+  else G.position.y=0;
   /* A waypoint parks the twin beside a lane, but getting from one to the next walks it
      straight across the column of text in between, which is where it used to sit at half
      brightness on top of the words. Brightness now follows how far out it actually is:
@@ -1243,8 +1347,11 @@ function frame(){
      place the figure may stand near the centre, because the right-hand column there is
      empty by construction — and on a phone there is no lane to cross at all. */
   const halfWv=Math.tan(cam.fov*Math.PI/360)*cam.position.z*cam.aspect;
-  const edge=Math.min(1,Math.abs(px)/(halfWv*.6));   /* 1 by the time it reaches its lane */
-  const cross=(sy<innerHeight*.55||!WIDE())?1:(.18+.82*edge*edge);
+  const f=Math.abs(px)/halfWv,edge=Math.min(1,f/.6);   /* edge is 1 by the time it reaches its lane */
+  /* and on the way out of frame it fades as it goes, instead of staying lit across the last
+     column of a grid until it finally clears the edge */
+  const exit=WIDE()?1-THREE.MathUtils.smoothstep(f,.85,1.3):1;
+  const cross=((sy<innerHeight*.55||!WIDE())?1:(.18+.82*edge*edge))*exit;
   focusW+=(focusOn-focusW)*Math.min(1,dt*5);
   pdim+=(tgt.dim*cross*(1+.4*focusW)-pdim)*k;
   /* per-section representation: scan line follows scroll (real→wireframe), blueprint + dissolve layer on top */
@@ -1288,8 +1395,29 @@ function frame(){
         : 0;
       hit.yaw+=(look-hit.yaw)*Math.min(1,dt*(hit.over?4:2.6));
     }
-    model.rotation.y+=(hit.yaw-model.rotation.y)*Math.min(1,dt*8);
+    /* Resting pose: square to the viewer wherever it stands on the page, leaning a little
+       toward the copy it is beside so it reads as presenting that section rather than
+       looking past it. Three terms: cancel the clip's own turn (measured, then smoothed
+       slowly so it takes out the clip's standing offset without fighting its natural sway),
+       face the camera (at the edge of a perspective view a front-facing figure appears
+       turned outward), and lean in toward the centre — scaled by how far out it stands, so
+       it is square-on in the middle of the page. Handling it adds hit.yaw on top. */
+    let rest=0;
+    if(torso){
+      const off=clipOffset();
+      if(off!==null)bodyYaw=off;
+      else{ /* no hips track to read: fall back to the measured facing, smoothed slowly */
+        const clip=wrapA(bodyFacing()-model.rotation.y);
+        if(!bodyInit){bodyYaw=clip;bodyInit=true;}
+        else bodyYaw+=wrapA(clip-bodyYaw)*Math.min(1,dt*.6);
+      }
+      rest=-bodyYaw;
+    }
+    rest+=Math.atan2(cam.position.x-G.position.x,cam.position.z-G.position.z);
+    rest-=Math.sign(G.position.x)*.22*Math.min(1,Math.abs(px)/(halfWv*.6));
+    model.rotation.y+=(rest+hit.yaw-model.rotation.y)*Math.min(1,dt*8);
   }
+  placeHud(sy,halfWv);
   if(!RM){
     grid.rotation.y=t*.12;
   }
