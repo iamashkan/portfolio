@@ -37,7 +37,10 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth;overflow-x:hidden}
-body{font-family:var(--sans);background:var(--bg);color:var(--ink);overflow-x:hidden;
+/* clip, not hidden: overflow-x:hidden makes <body> a scroll container of its own, and
+   position:sticky inside it (the pinned hero) then silently never sticks. hidden stays as the
+   fallback for browsers without clip. */
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);overflow-x:hidden;overflow-x:clip;
   line-height:1.7;-webkit-font-smoothing:antialiased}
 ::selection{background:rgba(255,255,255,.25)}
 a{color:inherit;text-decoration:none}
@@ -71,7 +74,21 @@ nav.scrolled{background:rgba(0,0,0,.8);backdrop-filter:blur(14px);border-bottom:
 .nav-cta:hover{background:#1f1f1f;border-color:rgba(255,255,255,.25)}
 
 /* hero */
-header{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;padding:120px 0 80px}
+header{position:relative;z-index:2}
+.hero-pin{position:relative;min-height:100vh;display:flex;align-items:center;padding:120px 0 80px}
+/* The scan from the real you to the twin — head first, down to the feet — used to play out
+   while the page scrolled into the XR reel. Once the twin learned to stay off full-width
+   content, it was hidden there, and the scan happened where nobody could see it. So on
+   desktop the hero holds still for a stretch of scroll and the scan plays in its own column,
+   before anything else arrives; then the page moves on. Only with the 3D scene running —
+   without the twin there is nothing to hold still for. The box keeps its natural height: on a
+   short window the hero is taller than the screen, and a fixed 100vh box clipped its top off.
+   Instead it sticks by its bottom edge (--pin-top goes negative), so its top scrolls away first
+   and the buttons are in view while it holds. Both values are set in buildTrack(). */
+@media(min-width:901px){
+  .has3d header{height:var(--hero-h,165vh)}
+  .has3d .hero-pin{position:sticky;top:var(--pin-top,0px)}
+}
 .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;width:100%}
 .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;
   color:var(--mut);margin-bottom:24px;display:inline-flex;align-items:center;gap:10px;
@@ -364,7 +381,7 @@ body.twin-drag{user-select:none;-webkit-user-select:none}
   .hero-grid{grid-template-columns:1fr;gap:30px}
   .hero-right{order:-1;min-height:max(300px,44vh)}
   .orbit-stage{min-height:300px}
-  header{min-height:auto;padding:104px 0 64px}
+  .hero-pin{min-height:auto;padding:104px 0 64px}
   section{padding:64px 0}
   .navlinks{display:none}
   .about{grid-template-columns:1fr;gap:30px}
@@ -382,7 +399,7 @@ body.twin-drag{user-select:none;-webkit-user-select:none}
 }
 @media(max-width:560px){
   .wrap{padding:0 18px}
-  header{padding:88px 0 48px}
+  .hero-pin{padding:88px 0 48px}
   header h1{font-size:clamp(2.2rem,10.5vw,2.9rem)}
   section{padding:48px 0}
   .twin-stand{width:150px;height:250px}
@@ -410,7 +427,7 @@ body.twin-drag{user-select:none;-webkit-user-select:none}
   <a class="nav-cta" href="#contact">Contact</a>
 </div></nav>
 
-<header><div class="wrap"><div class="hero-grid">
+<header><div class="hero-pin"><div class="wrap"><div class="hero-grid">
   <div>
     <div class="eyebrow"><span class="ln"></span> XR Developer · Digital Twin Engineer</div>
     <h1>Ashkan Aghamoali</h1>
@@ -431,7 +448,7 @@ body.twin-drag{user-select:none;-webkit-user-select:none}
   </div>
 </div></div>
 <div class="scroll-hint"><span>Scroll</span><span class="bar"></span></div>
-</header>
+</div></header>
 
 <div class="ticker" aria-hidden="true"><div class="ticker-track">
   <span>Unity3D <i>✦</i> Machine Learning <i>✦</i> PyTorch <i>✦</i> AR / VR <i>✦</i> Biomimetics <i>✦</i> Python <i>✦</i> Abaqus CAE <i>✦</i> Computer Vision <i>✦</i> C# <i>✦</i> WebXR <i>✦</i> CUDA <i>✦</i> Optimization <i>✦</i></span>
@@ -1023,7 +1040,9 @@ loadAvatar(0);
 /* scroll choreography — waypoints per section.
    fx: x as fraction of visible half-width · s: scale · dim: brightness
    real: fraction of body kept as real skin (1=all real → 0=all hologram)
-   blue: blueprint recolor · diss: disintegration/point-cloud · anim: motion role */
+   blue: blueprint recolor · diss: disintegration/point-cloud · anim: motion role
+   (diss is 0 throughout: it discarded whole 2cm cubes, and the dark page showed through the
+   holes as black squares across the body) */
 const WP={
   /* Two kinds of stop. Where a section is prose, its copy narrows to 60% and the twin stands
      lit in the free half beside it (|fx| .62 — the lane). Where a section is a full-width grid
@@ -1033,14 +1052,15 @@ const WP={
      running off the side of the page. The fade itself is geometric, not timed — see blockers
      — so it goes the moment full-width content actually reaches it. */
   header:        {fx:.5,   s:1.12,dim:1,   real:1,  blue:0,  diss:0,  anim:'idle'},  // the real you, before anything is scanned
-  work:          {fx:.5,   s:.94, dim:0,   real:.3, blue:0,  diss:.24,anim:'smoke'}, // hidden where it stands
+  scanned:       {fx:.5,   s:1.12,dim:1,   real:0,  blue:0,  diss:0,  anim:'idle'},  // end of the pinned hero: the whole figure read into the twin
+  work:          {fx:.5,   s:.94, dim:0,   real:.3, blue:0,  diss:0,  anim:'smoke'}, // hidden where it stands
   about:         {fx:-.62, s:.9,  dim:0,   real:.08,blue:0,  diss:0,  anim:'idle'},  // crosses unseen to the left lane
-  research:      {fx:-.62, s:.9,  dim:.5,  real:0,  blue:0,  diss:.32,anim:'idle'},  // lane — dispersing
+  research:      {fx:-.62, s:.9,  dim:.5,  real:0,  blue:0,  diss:0,  anim:'idle'},  // lane
   systems:       {fx:.62,  s:.92, dim:.55, real:0,  blue:1,  diss:0,  anim:'idle'},  // lane — CAD blueprint
   experience:    {fx:-.62, s:.92, dim:.5,  real:0,  blue:.35,diss:0,  anim:'smoke'}, // lane
-  certifications:{fx:-.62, s:.9,  dim:0,   real:0,  blue:0,  diss:.2, anim:'idle'},  // hidden where it stands
-  contact:       {fx:-.62, s:1.02,dim:.62, real:0,  blue:0,  diss:.55,anim:'smoke'}};// lane — back as the full hologram
-const track=[],blockers=[];let footDocTop=Infinity,stageTop=0,stageBot=0,twinBlocked=false;
+  certifications:{fx:-.62, s:.9,  dim:0,   real:0,  blue:0,  diss:0,  anim:'idle'},  // hidden where it stands
+  contact:       {fx:-.62, s:1.02,dim:.62, real:0,  blue:0,  diss:0,  anim:'smoke'}};// lane — back as the full hologram
+const track=[],blockers=[];let footDocTop=Infinity,stageTop=0,stageBot=0,twinBlocked=false,heroRun=0;
 function buildTrack(){
   track.length=0;
   /* The last section's centre sits below the furthest the page can actually scroll, so its
@@ -1050,6 +1070,24 @@ function buildTrack(){
   const maxY=Math.max(0,document.body.scrollHeight-innerHeight);
   document.querySelectorAll('header,section').forEach(el=>{
     const key=el.tagName==='HEADER'?'header':el.id,cfg=WP[key];if(!cfg)return;
+    if(key==='header'){
+      const pin=el.querySelector('.hero-pin');
+      if(pin){
+        if(WIDE()&&document.body.classList.contains('has3d')){
+          const ph=pin.offsetHeight;                 /* natural height, never less than the screen */
+          el.style.setProperty('--hero-h',(ph+Math.round(innerHeight*.65))+'px');
+          pin.style.setProperty('--pin-top',Math.min(0,innerHeight-ph)+'px');
+        }else{el.style.removeProperty('--hero-h');pin.style.removeProperty('--pin-top');}
+      }
+      /* the hero is two stops, not one: real at the top, fully scanned where the pinned stretch
+         ends and the page starts to move again. On a phone there is no pin, but the hero is
+         still taller than the screen, so the same stretch is simply the hero scrolling away —
+         the figure is scanned head-first as it rides up with the page. */
+      heroRun=Math.max(0,el.offsetHeight-innerHeight);
+      track.push({y:0,...cfg});
+      if(heroRun>0)track.push({y:Math.min(maxY,heroRun),...WP.scanned});
+      return;
+    }
     track.push({y:Math.min(maxY,Math.max(0,el.offsetTop+el.offsetHeight*.5-innerHeight*.5)),...cfg});
   });
   track.sort((p,q)=>p.y-q.y);
@@ -1313,6 +1351,7 @@ document.querySelectorAll('.sys,.sys-now,.proj').forEach(c=>{
 });
 
 document.body.classList.add('has3d');
+buildTrack();   /* the hero only pins once has3d is set: measure again with it in place */
 
 const clock=new THREE.Clock();
 let px=sample(scrollY).x,pscale=1,pdim=1,lastSy=scrollY,scrollV=0,appS=0,appA=0;
@@ -1346,7 +1385,7 @@ function frame(){
      empty by construction — and on a phone there is no lane to cross at all. */
   const halfWv=Math.tan(cam.fov*Math.PI/360)*cam.position.z*cam.aspect;
   const edge=Math.min(1,Math.abs(px)/(halfWv*.6));   /* 1 by the time it reaches its lane */
-  const cross=(sy<innerHeight*.55||!WIDE())?1:(.18+.82*edge*edge);
+  const cross=(sy<heroRun+innerHeight*.55||!WIDE())?1:(.18+.82*edge*edge);   /* the hero, pinned stretch included */
   focusW+=(focusOn-focusW)*Math.min(1,dt*5);
   /* hidden outright while full-width content overlaps it, and it fades out much faster than
      it fades in, so a fast scroll never catches it standing on the cards */
