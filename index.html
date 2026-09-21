@@ -828,36 +828,20 @@ const under=new THREE.PointLight(0xcccccc,1.4,7);under.position.set(0,.25,.7);G.
 /* silver transparent body + glowing wireframe mesh */
 const bodyMat=new THREE.MeshStandardMaterial({color:0x2a2a2e,emissive:0xb5b5c0,emissiveIntensity:.5,
   metalness:.15,roughness:.45,transparent:true,opacity:.22,depthWrite:true});
-const wireMat=new THREE.MeshBasicMaterial({color:0xe6e6ea,wireframe:true,transparent:true,opacity:.55,
+const wireMat=new THREE.MeshBasicMaterial({color:0xe6e6ea,wireframe:true,transparent:true,opacity:.4,
   blending:THREE.AdditiveBlending,depthWrite:false});
 
 /* ===== per-section "representation modes" for the digital twin =====
    uLineY  : world-space scan line — real skin shows below it, hologram above (scroll-driven feet↔head).
-   uBlue   : 0→1 blueprint (the Systems section): deep blue fill, section contours, a measuring sweep.
+   uBlue   : 0→1 blueprint recolor of the hologram (Code / manufacturing section).
    uDiss   : 0→1 disintegration — randomly discards fragments so the body breaks into a point/data cloud (XR).
-   uScan   : colour of the scan line.
-   One accent, used only where something is moving: the same blue as the profile's badges. The
-   figure itself stays silver; colour arrives as data rising through it from the floor — the
-   way sensor readings from the physical asset feed its twin — slow, sparse, never a wash. */
-const holoU={uLineY:{value:9},uBand:{value:.16},uScan:{value:new THREE.Color(0xa9ccff)},
-  uBlue:{value:0},uDiss:{value:0},uTime:{value:0},
-  uAccent:{value:new THREE.Color(0x5aa2ff)},uFlow:{value:RM?0:1},uShow:{value:1},
-  uToLocal:{value:new THREE.Matrix4()},uBase:{value:new THREE.Vector2(0,1)}};
-const HOLO_GLSL=`varying vec3 vWp;varying vec3 vNw;
-uniform float uLineY;uniform float uBand;uniform vec3 uScan;uniform float uBlue;uniform float uDiss;
-uniform float uTime;uniform vec3 uAccent;uniform float uFlow;uniform mat4 uToLocal;uniform vec2 uBase;uniform float uShow;
-float hh2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-float hh3(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}
-float vn3(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);
-  return mix(mix(mix(hh3(i),hh3(i+vec3(1,0,0)),f.x),mix(hh3(i+vec3(0,1,0)),hh3(i+vec3(1,1,0)),f.x),f.y),
-             mix(mix(hh3(i+vec3(0,0,1)),hh3(i+vec3(1,0,1)),f.x),mix(hh3(i+vec3(0,1,1)),hh3(i+vec3(1,1,1)),f.x),f.y),f.z);}
-`;
+   uScan   : glow colour of the scan line and dissolve edges. */
+const holoU={uLineY:{value:9},uBand:{value:.16},uScan:{value:new THREE.Color(0xffffff)},
+  uBlue:{value:0},uDiss:{value:0},uTime:{value:0},uShow:{value:1}};
 function heightMask(mat,side){
-  const top=side==='top',wire=!!mat.wireframe;
+  const top=side==='top';
   if(top){
     mat.transparent=true;
-    /* the blueprint's section contours are anti-aliased with fwidth, which WebGL1 must ask for */
-    mat.extensions=Object.assign(mat.extensions||{},{derivatives:true});
   }else{
     /* real layer renders as a normal OPAQUE model so the body skin and the hair sort by depth
        correctly (transparent + depthWrite:false on the hair was letting the scalp cover it → bald head).
@@ -866,98 +850,51 @@ function heightMask(mat,side){
   }
   const fade=mat.blending===THREE.AdditiveBlending?'gl_FragColor.rgb*=vis;':'gl_FragColor.a*=vis;';
   mat.onBeforeCompile=sh=>{
-    for(const k in holoU)sh.uniforms[k]=holoU[k];
-    sh.vertexShader='varying vec3 vWp;varying vec3 vNw;\n'+sh.vertexShader.replace('#include <skinning_vertex>',
-      '#include <skinning_vertex>\n\tvWp=(modelMatrix*vec4(transformed,1.0)).xyz;\n'+
-      '#ifdef USE_SKINNING\n\tvNw=normalize(mat3(modelMatrix)*objectNormal);\n'+
-      '#else\n\tvNw=normalize(mat3(modelMatrix)*normal);\n#endif\n');
-    let body='float vHy=vWp.y;\nfloat _a=smoothstep(uLineY-uBand,uLineY+uBand,vHy);\n';
+    sh.uniforms.uLineY=holoU.uLineY;sh.uniforms.uBand=holoU.uBand;sh.uniforms.uScan=holoU.uScan;
+    sh.uniforms.uBlue=holoU.uBlue;sh.uniforms.uDiss=holoU.uDiss;sh.uniforms.uTime=holoU.uTime;
+    sh.uniforms.uShow=holoU.uShow;
+    sh.vertexShader='varying vec3 vWp;\n'+sh.vertexShader.replace(
+      '#include <skinning_vertex>','#include <skinning_vertex>\n\tvWp=(modelMatrix*vec4(transformed,1.0)).xyz;');
+    let body='float vHy=vWp.y;\n'+
+      'float _a=smoothstep(uLineY-uBand,uLineY+uBand,vHy);\n';
     if(top){
       body+='float vis=_a;\n'+
-        /* everything is measured in the figure's own frame, so every pattern rides on the body
-           as it walks and turns instead of sliding through it */
-        'vec3 lp=(uToLocal*vec4(vWp,1.0)).xyz;\n'+
-        /* Point cloud. The skin is cut into ~2cm cells fixed to the body; as uDiss rises each
-           cell shrinks from a full cube to a small sphere, so the surface condenses into fine
-           LiDAR-like points, and then cells drop out as it disperses. (It used to drop whole
-           cubes on a grid that jumped every two seconds: square pixels, flickering.) The
-           network is not cut — it stays whole behind the points as the scaffold. */
-        'vec3 vc=lp*46.0;\nfloat h=hh3(floor(vc));\nfloat dz=smoothstep(0.0,0.3,uDiss);\n'+
-        (wire?'':'if(dz>0.001){if(h<uDiss*0.85)discard;if(length(fract(vc)-0.5)>mix(0.9,0.26,dz))discard;}\n')+
+        /* disintegrate into a drifting point/data cloud */
+        'float h=fract(sin(dot(floor(vWp*46.0+uTime*0.5),vec3(12.9898,78.233,37.719)))*43758.5453);\n'+
+        'if(uDiss>0.001 && h<uDiss) discard;\n'+
         'if(vis<0.02)discard;\n'+fade+'\n'+
-        'float hN=clamp((lp.y-uBase.x)/uBase.y,0.0,1.0);\n'+
-        'float fres=pow(1.0-abs(dot(normalize(vNw),normalize(cameraPosition-vWp))),2.0);\n'+
-        /* data rising through the network: strands, each ~11cm column on its own clock and
-           speed, firing on only some of its cycles — irregular, like traffic, not rings */
-        'vec2 cell=floor(lp.xz*9.0);\n'+
-        'float r1=hh2(cell),r2=hh2(cell+17.3);\n'+
-        'float st=uTime*(0.12+0.08*r2)+r1;\n'+
-        'float pkt=exp(-fract(st-hN)*10.0)*step(0.55,hh2(cell+floor(st-hN)*7.13))*uFlow*(1.0-0.75*uBlue);\n'+
-        /* soft sides: a streak of light, brightest down its middle, not a lit rectangle */
-        'vec2 cf=fract(lp.xz*9.0);\n'+
-        'pkt*=smoothstep(0.0,0.42,min(cf.x,1.0-cf.x))*smoothstep(0.0,0.42,min(cf.y,1.0-cf.y));\n'+
-        'float shim=mix(1.0,0.82+0.34*vn3(lp*5.0+vec3(0.0,-uTime*0.25,0.0)),uFlow);\n'+
-        /* the head is the densest part of the mesh — eyes, teeth and mouth are meshes of their
-           own inside it — and additive lines stack there into a white mask with dark sockets.
-           Bring it back to the body's level. The data passing through is left at full. */
-        'float headDamp=mix(1.0,0.5,smoothstep(0.83,0.88,hN));\n';
-      body+=wire
-        /* the network: silhouettes carry the light and the interior recedes, so it reads as a
-           volume rather than a flat net; cool silver, or pale drafting blue on the blueprint */
-        ? 'vec3 base=gl_FragColor.rgb*(0.8+0.8*fres)*shim*headDamp;\n'+
-          'base=mix(base,base*vec3(0.82,0.92,1.12),0.6);\n'+
-          'base=mix(base,dot(base,vec3(0.3333))*vec3(0.62,0.80,1.0)*1.35,uBlue);\n'+
-          'base*=1.0-0.45*dz;\n'+                       /* recedes to a scaffold behind the points */
-          'gl_FragColor.rgb=base+uAccent*pkt*vis*3.5;\n'
-        /* the skin: a cool glassy rim; on the blueprint, deep blue with a section contour
-           every 4cm and a single measuring plane sweeping slowly up the body */
-        : 'vec3 f=gl_FragColor.rgb;\n'+
-          'f=mix(f,f*vec3(0.85,0.93,1.1),0.5)+uAccent*fres*0.35*uFlow;\n'+
-          'float cv=lp.y*25.0;\n'+
-          'float cl=1.0-min(abs(fract(cv-0.5)-0.5)/max(fwidth(cv),1e-4),1.0);\n'+
-          'float sweep=exp(-pow((hN-fract(uTime*0.07))/0.0065,2.0))*uFlow;\n'+
-          'f=mix(f,vec3(0.03,0.09,0.18)+vec3(0.55,0.75,1.0)*(cl*0.7+sweep*0.85),uBlue);\n'+
-          'gl_FragColor.a=min(1.0,mix(gl_FragColor.a,gl_FragColor.a*(1.0+2.2*cl+2.2*sweep),uBlue));\n'+
-          /* the strand also glows softly inside the glass, so it reads as light travelling
-             through the body rather than as specks on the lines */
-          'gl_FragColor.rgb=mix(f,uAccent,pkt*0.45);\n'+
-          /* scaled by the material's opacity: added on its own, the streaks kept showing while
-             the twin was faded out over the cards — small specks rising through a hidden figure */
-          'gl_FragColor.a=min(1.0,gl_FragColor.a+pkt*0.22*vis*opacity);\n';
-      /* point cloud: what survives shimmers softly in cool white, and the voxels about to go
-         catch the accent as they scatter */
-      if(!wire)body+=
-        /* the points: cool white, each breathing on its own phase, bright enough to read as
-           light rather than as a dim skin; the ones about to drop out catch the accent */
-        'float tw=mix(1.0,0.7+0.3*sin(uTime*1.7+fract(h*91.7)*6.2832),uFlow);\n'+
-        'gl_FragColor.rgb=mix(gl_FragColor.rgb,vec3(0.80,0.89,1.0)*tw,dz*0.85);\n'+
-        'gl_FragColor.a=min(1.0,mix(gl_FragColor.a,gl_FragColor.a*3.4*headDamp,dz));\n'+
-        'gl_FragColor.rgb+=uAccent*smoothstep(uDiss*0.85+0.08,uDiss*0.85,h)*dz*1.2;\n';
+        /* blueprint: push toward technical bright silver */
+        'gl_FragColor.rgb=mix(gl_FragColor.rgb, gl_FragColor.rgb*vec3(1.25,1.25,1.3)+vec3(0.05,0.05,0.06), uBlue);\n'+
+        /* glow on fragments near the dissolve edge so it shimmers as it scatters */
+        'gl_FragColor.rgb+=uScan*smoothstep(uDiss+0.06,uDiss,h)*step(0.002,uDiss)*0.9;\n';
     }else{
       /* opaque dither clip: keep the real skin below the line, soft edge without breaking depth sort.
          uShow fades this layer with the hologram — dithered, since it is opaque — so it is hidden
          over full-width content too; before, only the hologram faded and the unscanned legs stayed
-         drawn over the cards. '<=' so that zero is really zero: with '<' any cell whose hash came
-         out exactly 0 was never discarded, and a scatter of skin-coloured pixels leaked through. */
+         drawn over the cards. The hash only has about 8 bits below the point, so roughly one cell
+         in 256 hashes to exactly 0 — and such a cell survived any vis above zero, including the
+         vanishing tail of a fade, as a scatter of skin-coloured pixels. A cell now has to clear a
+         small floor as well as its hash. */
       body+='float vis=(1.0-_a)*uShow;\n'+
         'float hb=fract(sin(dot(floor(vWp*130.0),vec3(12.9898,78.233,37.719)))*43758.5453);\n'+
-        'if(vis<=hb) discard;\n';
+        'if(vis<=max(hb,0.004)) discard;\n';
     }
     body+='gl_FragColor.rgb+=uScan*exp(-pow((vHy-uLineY)/(uBand*0.55),2.0))*0.7;\n';
-    sh.fragmentShader=HOLO_GLSL+
+    sh.fragmentShader='varying vec3 vWp;\nuniform float uLineY;uniform float uBand;uniform vec3 uScan;'+
+      'uniform float uBlue;uniform float uDiss;uniform float uTime;uniform float uShow;\n'+
       sh.fragmentShader.replace('#include <dithering_fragment>',body+'#include <dithering_fragment>');
   };
-  mat.customProgramCacheKey=()=>'holo2_'+side+(wire?'_wire':'')+(mat.blending===THREE.AdditiveBlending?'_add':'');
+  mat.customProgramCacheKey=()=>'holo_'+side+(mat.blending===THREE.AdditiveBlending?'_add':'');
   return mat;
 }
 heightMask(bodyMat,'top');heightMask(wireMat,'top');
 /* wireframe dims on a steeper curve: additive lines stack per-pixel and resist linear dimming */
-const fadeAvatar=[{m:bodyMat,o:bodyMat.opacity,e:1},{m:wireMat,o:wireMat.opacity,e:1.4}];
+const fadeAvatar=[{m:bodyMat,o:bodyMat.opacity,e:1},{m:wireMat,o:wireMat.opacity,e:1.7}];
 const fadeScene=[];
 const reg=m=>fadeScene.push({m,o:m.opacity});
 
 /* holographic floor disc */
-const grid=new THREE.PolarGridHelper(1.05,12,5,64,0x8f97a8,0x363c4a);
+const grid=new THREE.PolarGridHelper(1.05,12,5,64,0x8a8a92,0x3a3a40);
 grid.material.transparent=true;grid.material.opacity=.45;grid.material.depthWrite=false;reg(grid.material);
 G.add(grid);
 const glowTex=(()=>{const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');
@@ -968,13 +905,6 @@ const glowMat=new THREE.MeshBasicMaterial({map:glowTex,transparent:true,opacity:
 reg(glowMat);
 const glow=new THREE.Mesh(new THREE.PlaneGeometry(2.6,2.6),glowMat);
 glow.rotation.x=-Math.PI/2;glow.position.y=.012;G.add(glow);
-/* a thin ring that leaves the feet and spreads to the edge of the disc every few seconds —
-   the floor sending data up into the figure. Kept faint, and only on the hologram: the
-   photoreal figure in the hero gets none of it. */
-const pingMat=new THREE.MeshBasicMaterial({color:0x5aa2ff,transparent:true,opacity:0,
-  blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide});
-const ping=new THREE.Mesh(new THREE.RingGeometry(.985,1,96),pingMat);
-ping.rotation.x=-Math.PI/2;ping.position.y=.014;G.add(ping);
 
 
 /* avatar — humanoid GLB with idle/walk/run, wireframe shell sharing the same skeleton */
@@ -1018,11 +948,7 @@ function adopt(gltf,role){
     });
   });
   /* hologram layers: blue body fill + glowing wireframe, masked to the upper body, sharing the skeleton */
-  /* The eyes, lashes, teeth and tongue are meshes of their own inside the head — some 2,600
-     triangles on top of a head that is already a third of the model. As hologram they add
-     nothing you can read: the lines stacked into a white mask, and the eyeballs' shells hid
-     the lines behind them as two dark sockets. They keep their place in the photoreal layer. */
-  shells.filter(src=>!/teeth|tongue|eye|lash/i.test(src.name)).forEach(src=>{
+  shells.forEach(src=>{
     [bodyMat,wireMat].forEach(mat=>{
       const w=src.isSkinnedMesh?new THREE.SkinnedMesh(src.geometry,mat):new THREE.Mesh(src.geometry,mat);
       w.position.copy(src.position);w.quaternion.copy(src.quaternion);w.scale.copy(src.scale);
@@ -1109,11 +1035,11 @@ const WP={
   header:        {fx:.5,   s:1.12,dim:1,   real:1,  blue:0,  diss:0,  anim:'idle'},  // the real you, before anything is scanned
   work:          {fx:.5,   s:.94, dim:0,   real:.3, blue:0,  diss:.24,anim:'smoke'}, // hidden where it stands
   about:         {fx:-.62, s:.9,  dim:0,   real:.08,blue:0,  diss:0,  anim:'idle'},  // crosses unseen to the left lane
-  research:      {fx:-.62, s:.9,  dim:.5,  real:0,  blue:0,  diss:0,  anim:'idle'},  // lane — the network, data rising
-  systems:       {fx:.62,  s:.92, dim:.55, real:0,  blue:1,  diss:0,  anim:'idle'},  // lane — blueprint: section contours, measuring sweep
-  experience:    {fx:-.62, s:.92, dim:.5,  real:0,  blue:0,  diss:.34,anim:'smoke'}, // lane — point-cloud scan over the network
+  research:      {fx:-.62, s:.9,  dim:.5,  real:0,  blue:0,  diss:.32,anim:'idle'},  // lane — dispersing
+  systems:       {fx:.62,  s:.92, dim:.55, real:0,  blue:1,  diss:0,  anim:'idle'},  // lane — CAD blueprint
+  experience:    {fx:-.62, s:.92, dim:.5,  real:0,  blue:.35,diss:0,  anim:'smoke'}, // lane
   certifications:{fx:-.62, s:.9,  dim:0,   real:0,  blue:0,  diss:.2, anim:'idle'},  // hidden where it stands
-  contact:       {fx:-.62, s:1.02,dim:.62, real:0,  blue:0,  diss:.6, anim:'smoke'}};// lane — the cloud thinning out
+  contact:       {fx:-.62, s:1.02,dim:.62, real:0,  blue:0,  diss:.55,anim:'smoke'}};// lane — back as the full hologram
 const track=[],blockers=[];let footDocTop=Infinity,stageTop=0,stageBot=0,twinBlocked=false;
 function buildTrack(){
   track.length=0;
@@ -1430,14 +1356,7 @@ function frame(){
   /* per-section representation: scan line follows scroll (real→wireframe), blueprint + dissolve layer on top */
   mReal+=(tgt.real-mReal)*k;mBlue+=(tgt.blue-mBlue)*k;mDiss+=(tgt.diss-mDiss)*k;
   holoU.uTime.value=t;
-  holoU.uShow.value=Math.min(1,pdim);
-  /* the figure's own frame, so strands, contours and the sweep stay on the body as it moves */
-  if(model){model.updateWorldMatrix(true,false);holoU.uToLocal.value.copy(model.matrixWorld).invert();}
-  holoU.uBase.value.set(mYMin,mYH);
-  /* one ping every 3.6 s, easing out as it spreads; nothing while the figure is still photoreal */
-  const pc=(t%3.6)/3.6;
-  ping.scale.setScalar(.16+pc*.9);
-  pingMat.opacity=RM?0:.34*(1-pc)*(1-pc)*THREE.MathUtils.smoothstep(pc,0,.06)*(1-mReal)*pdim*appS;
+  holoU.uShow.value=pdim<.003?0:Math.min(1,pdim);   /* an eased fade never quite reaches 0 */
   /* pad the travel beyond head/feet by >half a band so real:1 has no wireframe scalp
      and real:0 leaves no real sliver at the feet */
   const bandL=.13,marginL=.2;
